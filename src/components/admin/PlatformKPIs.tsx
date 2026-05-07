@@ -8,7 +8,7 @@ export function PlatformKPIs() {
       change: "+12.3%",
       trend: "up",
       icon: Users,
-      color: "from-blue-500 to-cyan-500"
+      color: "from-[hsl(174,100%,29%)] to-[hsl(174,80%,40%)]"
     },
     {
       label: "الإيرادات الشهرية (MRR)",
@@ -24,7 +24,7 @@ export function PlatformKPIs() {
       change: "+22.1%",
       trend: "up",
       icon: TrendingUp,
-      color: "from-violet-500 to-purple-500"
+      color: "from-[hsl(210,100%,12%)] to-[hsl(210,100%,25%)]"
     },
     {
       label: "الاشتراكات النشطة",
@@ -40,7 +40,7 @@ export function PlatformKPIs() {
       change: "+15.2%",
       trend: "up",
       icon: Calendar,
-      color: "from-amber-500 to-orange-500"
+      color: "from-[hsl(38,70%,55%)] to-[hsl(38,80%,65%)]"
     },
     {
       label: "معدل الإلغاء (Churn)",

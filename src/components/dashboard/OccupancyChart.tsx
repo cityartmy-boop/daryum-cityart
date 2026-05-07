@@ -23,8 +23,8 @@ export function OccupancyChart() {
         <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="occupancyGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="hsl(260, 60%, 55%)" />
-              <stop offset="100%" stopColor="hsl(280, 65%, 60%)" />
+              <stop offset="0%" stopColor="hsl(210, 100%, 12%)" />
+              <stop offset="100%" stopColor="hsl(210, 100%, 25%)" />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -53,7 +53,7 @@ export function OccupancyChart() {
             dataKey="occupancy" 
             stroke="url(#occupancyGradient)" 
             strokeWidth={3}
-            dot={{ fill: 'hsl(260, 60%, 55%)', r: 5 }}
+            dot={{ fill: 'hsl(210, 100%, 12%)', r: 5 }}
             activeDot={{ r: 7 }}
           />
         </LineChart>

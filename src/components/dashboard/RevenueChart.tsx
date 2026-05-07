@@ -21,7 +21,7 @@ export function RevenueChart() {
         </div>
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-[hsl(174,100%,29%)] to-[hsl(174,80%,40%)]"></div>
             <span>الإيراد الفعلي</span>
           </div>
           <div className="flex items-center gap-2">
@@ -35,8 +35,8 @@ export function RevenueChart() {
         <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(200, 95%, 55%)" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="hsl(260, 60%, 55%)" stopOpacity={0.05}/>
+              <stop offset="5%" stopColor="hsl(174, 100%, 29%)" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="hsl(174, 100%, 29%)" stopOpacity={0.05}/>
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -70,7 +70,7 @@ export function RevenueChart() {
           <Area 
             type="monotone" 
             dataKey="revenue" 
-            stroke="hsl(200, 95%, 55%)" 
+            stroke="hsl(174, 100%, 29%)" 
             fill="url(#revenueGradient)" 
             strokeWidth={3}
           />

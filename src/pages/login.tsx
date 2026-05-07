@@ -42,7 +42,7 @@ export default function Login() {
           <div className="w-full max-w-md">
             <Link href="/" className="inline-block mb-8">
               <Image 
-                src="/daryum-logo.png" 
+                src="/داريوم.png" 
                 alt="داريوم" 
                 width={160}
                 height={50}
