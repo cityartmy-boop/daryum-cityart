@@ -13,6 +13,7 @@ import {
 
 export function Header() {
   const { user, logout } = useAuth();
+  const unreadCount = 3; // قيمة تجريبية لعدد الإشعارات غير المقروءة
 
   return (
     <header className="h-16 glass border-b border-border/50 flex items-center justify-between px-6">
