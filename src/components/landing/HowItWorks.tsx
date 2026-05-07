@@ -4,36 +4,36 @@ export function HowItWorks() {
   const steps = [
     {
       icon: UserPlus,
-      step: "1",
-      title: "سجّل حسابك مجانًا",
-      description: "أنشئ حسابك في دقائق واحصل على 14 يوم تجربة مجانية بدون الحاجة لبطاقة ائتمان"
+      number: "1",
+      title: "سجّل حسابك مجاناً",
+      description: "أنشئ حسابك في دقائق واحصل على 14 يوم تجربة مجانية"
     },
     {
       icon: Building2,
-      step: "2",
+      number: "2",
       title: "أضف عقاراتك ووحداتك",
-      description: "أدخل بيانات العقارات والوحدات مع الصور والتفاصيل لإطلاق سريع"
+      description: "أدخل بيانات العقارات والوحدات مع الصور والتفاصيل"
     },
     {
       icon: Settings,
-      step: "3",
+      number: "3",
       title: "اربط منصات الحجز",
-      description: "قم بالربط التلقائي مع Airbnb وBooking.com وغيرها بنقرة واحدة"
+      description: "قم بالربط التلقائي مع Airbnb وBooking.com وغيرها"
     },
     {
       icon: TrendingUp,
-      step: "4",
+      number: "4",
       title: "راقب الأداء وحسّن الإيرادات",
-      description: "تابع التقارير والتحليلات الذكية لتحسين الإشغال والعوائد"
+      description: "تابع التقارير والتحليلات الذكية لتحسين الإشغال"
     }
   ];
 
   return (
     <section className="py-24 bg-background relative overflow-hidden">
       {/* Background Decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute inset-0">
+        <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2"></div>
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl -translate-y-1/2"></div>
       </div>
       
       <div className="container mx-auto px-6 relative z-10">
@@ -52,22 +52,36 @@ export function HowItWorks() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="space-y-8">
+        {/* Horizontal Timeline */}
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-6 relative">
+            {/* Connection Line (hidden on mobile) */}
+            <div className="hidden md:block absolute top-12 right-0 left-0 h-1 bg-gradient-to-l from-primary via-secondary to-accent opacity-20" 
+                 style={{ transform: 'translateY(-50%)' }}></div>
+            
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="flex gap-6 items-start glass rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group hover:-translate-x-2 border border-border/50 hover:border-primary/30 animate-slide-in-left"
-                style={{ animationDelay: `${index * 200}ms` }}
+                className="relative animate-fade-in-up"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-black shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                  {step.step}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                {/* Step Card */}
+                <div className="glass rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 group hover:-translate-y-2 border border-border/50 hover:border-primary/30 relative z-10">
+                  {/* Number Badge */}
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xl font-black shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 mx-auto mb-4">
+                    {step.number}
+                  </div>
+                  
+                  {/* Icon */}
+                  <div className="w-14 h-14 rounded-xl bg-muted/30 p-3 mb-4 mx-auto group-hover:bg-primary/10 transition-colors">
+                    <step.icon className="w-full h-full text-primary" />
+                  </div>
+                  
+                  {/* Content */}
+                  <h3 className="text-lg font-bold mb-2 text-center group-hover:text-primary transition-colors">
                     {step.title}
                   </h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
+                  <p className="text-sm text-muted-foreground text-center leading-relaxed">
                     {step.description}
                   </p>
                 </div>

@@ -117,7 +117,7 @@ export function WhyDaryum() {
             <div 
               key={index}
               className="glass rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group hover:-translate-y-2 animate-fade-in-up border border-border/50 hover:border-primary/30"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} p-3 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg`}>
                 <feature.icon className="w-full h-full text-white" />
