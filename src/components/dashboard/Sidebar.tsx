@@ -42,11 +42,12 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-72 glass border-l border-border/50 flex flex-col h-screen">
+    <aside className="fixed right-0 top-0 h-screen w-72 glass border-l border-border/50 flex flex-col z-20">
+      {/* Logo */}
       <div className="p-6 border-b border-border/50">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center justify-center">
           <Image 
-            src="/daryum-logo.png" 
+            src="/داريوم.png" 
             alt="داريوم" 
             width={140}
             height={40}
@@ -55,7 +56,8 @@ export function Sidebar() {
         </Link>
       </div>
       
-      <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {menuItems.map((item, index) => {
           const isActive = router.pathname === item.href;
           return (
@@ -64,8 +66,8 @@ export function Sidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 isActive 
-                  ? "gradient-primary text-white font-semibold" 
-                  : "hover:bg-muted/50 text-foreground"
+                  ? "gradient-primary text-white font-semibold shadow-lg" 
+                  : "hover:bg-muted/50 text-foreground hover:translate-x-1"
               }`}
             >
               <item.icon className="w-5 h-5" />
@@ -79,6 +81,7 @@ export function Sidebar() {
           );
         })}
 
+        {/* Admin Section */}
         <div className="pt-4 mt-4 border-t border-border/50">
           <div className="text-xs text-muted-foreground px-4 mb-2 font-semibold">إدارة النظام</div>
           {adminMenu.map((item, index) => {
@@ -89,8 +92,8 @@ export function Sidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                   isActive 
-                    ? "gradient-primary text-white font-semibold" 
-                    : "hover:bg-muted/50 text-foreground"
+                    ? "gradient-accent text-secondary font-semibold shadow-lg" 
+                    : "hover:bg-muted/50 text-foreground hover:translate-x-1"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -101,15 +104,16 @@ export function Sidebar() {
         </div>
       </nav>
       
+      {/* User Profile Card */}
       <div className="p-4 border-t border-border/50">
-        <div className="glass rounded-xl p-4">
+        <div className="glass-dark rounded-xl p-4 hover:scale-105 transition-transform cursor-pointer">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold">
+            <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-lg shadow-lg">
               أ
             </div>
             <div className="flex-1 text-right">
-              <div className="font-semibold text-sm">أحمد الشمري</div>
-              <div className="text-xs text-muted-foreground mt-2">42 عقار • 156 وحدة</div>
+              <div className="font-bold text-sm">أحمد الشمري</div>
+              <div className="text-xs text-muted-foreground mt-1">42 عقار • 156 وحدة</div>
             </div>
           </div>
         </div>
