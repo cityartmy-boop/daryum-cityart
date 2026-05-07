@@ -1,5 +1,6 @@
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { OccupancyChart } from "@/components/dashboard/OccupancyChart";
@@ -10,46 +11,36 @@ import { AIInsights } from "@/components/dashboard/AIInsights";
 
 export default function Dashboard() {
   return (
-    <>
-      <SEO 
-        title="لوحة التحكم - داريوم"
-        description="لوحة التحكم الرئيسية لإدارة العقارات والحجوزات"
-      />
+    <ProtectedRoute>
+      <SEO title="لوحة التحكم - داريوم" description="إدارة عقاراتك المؤجرة بذكاء" />
       
       <AppShell>
-        {/* Welcome */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-black mb-2">مرحبًا، محمد 👋</h1>
-          <p className="text-muted-foreground">إليك نظرة عامة على محفظتك العقارية اليوم</p>
-        </div>
+        <h1 className="text-4xl font-bold mb-2">لوحة التحكم</h1>
+        <p className="text-muted-foreground mb-8">نظرة شاملة على أداء عقاراتك</p>
 
-        {/* KPIs */}
+        {/* KPI Cards */}
         <KPICards />
 
-        {/* Charts Row */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Charts Grid */}
+        <div className="grid lg:grid-cols-2 gap-6 mt-6">
           <RevenueChart />
           <OccupancyChart />
         </div>
 
         {/* Channel Performance */}
-        <div className="mb-6">
+        <div className="mt-6">
           <ChannelPerformance />
         </div>
 
-        {/* Operations Grid */}
-        <div className="grid lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
-            <RecentReservations />
-          </div>
-          <div>
+        {/* Bottom Section */}
+        <div className="grid lg:grid-cols-2 gap-6 mt-6">
+          <RecentReservations />
+          <div className="space-y-6">
             <AIInsights />
+            <TodaysOperations />
           </div>
         </div>
-
-        {/* Today's Operations */}
-        <TodaysOperations />
       </AppShell>
-    </>
+    </ProtectedRoute>
   );
 }

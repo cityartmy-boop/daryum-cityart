@@ -14,7 +14,8 @@ import {
   BarChart3,
   Zap,
   Settings,
-  Shield
+  Shield,
+  User
 } from "lucide-react";
 
 export function Sidebar() {
@@ -32,6 +33,7 @@ export function Sidebar() {
     { icon: DollarSign, label: "المالية", href: "/dashboard/finance" },
     { icon: BarChart3, label: "التقارير", href: "/dashboard/reports" },
     { icon: Zap, label: "الأتمتة", href: "/dashboard/automations" },
+    { icon: User, label: "الملف الشخصي", href: "/dashboard/profile" },
     { icon: Settings, label: "الإعدادات", href: "/dashboard/settings" },
   ];
 
