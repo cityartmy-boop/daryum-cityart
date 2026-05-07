@@ -1,4 +1,4 @@
-import { Crown, Users, DollarSign, Calculator, ClipboardCheck, Wrench } from "lucide-react";
+import { Crown, Users, DollarSign, Calculator, ClipboardCheck, Wrench, CheckCircle2 } from "lucide-react";
 
 export function RoleBenefits() {
   const roles = [
@@ -71,36 +71,45 @@ export function RoleBenefits() {
   ];
 
   return (
-    <section id="solutions" className="py-24 bg-gradient-to-b from-muted/20 to-background">
-      <div className="container mx-auto px-6">
+    <section className="py-24 bg-muted/30 relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-accent/10 to-transparent rounded-full blur-3xl"></div>
+      
+      <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16 animate-fade-in-up">
-          <span className="text-primary font-bold text-sm tracking-wider">الحلول</span>
-          <h2 className="text-5xl font-black mt-4 mb-6">
-            حل مصمم لكل دور
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-6 hover:scale-105 transition-transform duration-300">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            حل لكل دور
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-black mb-6">
+            <span className="text-foreground">مصمم خصيصاً</span>
+            <br />
+            <span className="text-gradient">لكل عضو في فريقك</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            صلاحيات وواجهات مخصصة لكل عضو في فريقك
+            واجهات مخصصة وصلاحيات دقيقة لكل دور في عملية إدارة العقارات
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {roles.map((role, index) => (
-            <div 
+            <div
               key={index}
-              className="glass rounded-3xl p-8 hover:shadow-2xl transition-all group animate-scale-in glow-hover"
-              style={{animationDelay: `${index * 100}ms`}}
+              className="glass rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group hover:-translate-y-2 border border-border/50 hover:border-primary/30 animate-scale-in"
+              style={{ animationDelay: `${index * 150}ms` }}
             >
-              <div className={`w-20 h-20 bg-gradient-to-br ${role.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg`}>
-                <role.icon className="w-10 h-10 text-white" />
+              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${role.color} p-4 mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                <role.icon className="w-full h-full text-white" />
               </div>
-              
-              <h3 className="text-2xl font-black mb-4">{role.title}</h3>
-              
+              <h3 className="text-xl font-bold mb-4 group-hover:text-primary transition-colors">
+                {role.title}
+              </h3>
               <ul className="space-y-3">
-                {role.benefits.map((benefit, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                    <span className="text-muted-foreground leading-relaxed">{benefit}</span>
+                {role.benefits.map((benefit, i) => (
+                  <li key={i} className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="leading-relaxed">{benefit}</span>
                   </li>
                 ))}
               </ul>

@@ -8,11 +8,18 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Sidebar />
-      <div className="mr-64">
+    <div className="min-h-screen bg-background">
+      {/* Sidebar - Hidden on mobile, visible on desktop */}
+      <div className="hidden lg:block">
+        <Sidebar />
+      </div>
+      
+      {/* Main Content Area */}
+      <div className="lg:mr-72">
         <Header />
-        <main className="p-8">
+        
+        {/* Content with proper padding */}
+        <main className="p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

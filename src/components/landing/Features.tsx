@@ -78,34 +78,42 @@ export function Features() {
   ];
   
   return (
-    <section className="py-24 bg-gradient-to-b from-background to-white">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-display text-secondary mb-4">
-            منصة شاملة لكل احتياجاتك
+    <section className="py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="text-center mb-16 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-6 hover:scale-105 transition-transform duration-300">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            الميزات الأساسية
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-black mb-6">
+            <span className="text-gradient">كل ما تحتاجه</span>
+            <br />
+            <span className="text-foreground">لإدارة عقاراتك بكفاءة</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            كل ما تحتاجه لإدارة محفظة عقارية احترافية في مكان واحد
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            منصة متكاملة تجمع جميع أدوات إدارة العقارات في مكان واحد
           </p>
         </div>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, i) => (
-            <div 
-              key={i} 
-              className="group bg-white rounded-2xl p-6 border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300"
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              className="glass rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group hover:-translate-y-2 border border-border/50 hover:border-primary/30 animate-fade-in-up"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className={`w-14 h-14 rounded-xl ${feature.bgColor} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                <feature.icon className={`w-7 h-7 ${feature.color}`} />
+              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} p-4 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                <feature.icon className="w-full h-full text-white" />
               </div>
-              <h3 className="text-xl font-display text-secondary mb-2">
-                {feature.titleAr}
+              <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+                {feature.title}
               </h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                {feature.titleEn}
-              </p>
               <p className="text-muted-foreground leading-relaxed">
-                {feature.descAr}
+                {feature.description}
               </p>
             </div>
           ))}
