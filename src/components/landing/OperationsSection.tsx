@@ -1,4 +1,4 @@
-import { ClipboardCheck, Wrench, Clock, CheckCircle2, AlertTriangle, Calendar } from "lucide-react";
+import { ClipboardCheck, Wrench, Clock, CheckCircle2, AlertTriangle, Calendar, Users, DollarSign } from "lucide-react";
 
 export function OperationsSection() {
   const housekeepingFeatures = [
