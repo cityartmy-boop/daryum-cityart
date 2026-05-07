@@ -1,5 +1,5 @@
 import { 
-  Zap, 
+  Sparkles,
   Globe, 
   Shield, 
   TrendingUp, 
@@ -8,100 +8,122 @@ import {
   DollarSign,
   MessageSquare,
   BarChart3,
-  Calendar,
-  Building2,
-  FileText
+  Zap,
+  CheckCircle2,
+  Bell
 } from "lucide-react";
 
 export function WhyDaryum() {
   const features = [
     {
-      icon: Zap,
-      title: "مزامنة فورية",
-      description: "تحديث تلقائي للحجوزات والأسعار عبر جميع المنصات"
+      icon: Sparkles,
+      title: "ذكاء اصطناعي متقدم",
+      description: "رؤى وتوصيات ذكية لتحسين الأداء",
+      color: "from-purple-500 to-pink-500"
     },
     {
       icon: Globe,
-      title: "تكامل عالمي",
-      description: "اتصال مباشر مع Airbnb وBooking وأكثر من 15 قناة"
-    },
-    {
-      icon: Shield,
-      title: "أمان متقدم",
-      description: "حماية شاملة للبيانات مع نسخ احتياطي يومي"
+      title: "مزامنة مع جميع المنصات",
+      description: "ربط تلقائي مع Airbnb وBooking.com وغيرها",
+      color: "from-blue-500 to-cyan-500"
     },
     {
       icon: TrendingUp,
-      title: "ذكاء اصطناعي",
-      description: "توصيات ذكية لزيادة الإيرادات والإشغال"
-    },
-    {
-      icon: Users,
-      title: "إدارة الفريق",
-      description: "صلاحيات مخصصة لكل دور في فريقك"
-    },
-    {
-      icon: Clock,
-      title: "أتمتة كاملة",
-      description: "وفر ساعات عملك بأتمتة المهام المتكررة"
+      title: "تحليلات شاملة",
+      description: "تقارير مفصلة عن الأداء والإيرادات",
+      color: "from-green-500 to-emerald-500"
     },
     {
       icon: DollarSign,
-      title: "تسعير ديناميكي",
-      description: "أسعار تلقائية بناءً على الطلب والموسم"
+      title: "إدارة مالية متكاملة",
+      description: "متابعة الإيرادات والمدفوعات بدقة",
+      color: "from-yellow-500 to-orange-500"
     },
     {
       icon: MessageSquare,
       title: "رسائل موحدة",
-      description: "جميع محادثات الضيوف في صندوق وارد واحد"
+      description: "صندوق وارد واحد لجميع قنوات التواصل",
+      color: "from-indigo-500 to-purple-500"
+    },
+    {
+      icon: Users,
+      title: "إدارة الفرق",
+      description: "صلاحيات مخصصة لكل عضو في الفريق",
+      color: "from-pink-500 to-rose-500"
+    },
+    {
+      icon: Clock,
+      title: "أتمتة العمليات",
+      description: "توفير الوقت من خلال المهام التلقائية",
+      color: "from-teal-500 to-green-500"
+    },
+    {
+      icon: Shield,
+      title: "أمان عالي",
+      description: "حماية بياناتك بأعلى معايير الأمان",
+      color: "from-red-500 to-orange-500"
     },
     {
       icon: BarChart3,
-      title: "تحليلات عميقة",
-      description: "تقارير مفصلة عن الأداء والإيرادات"
+      title: "تقارير مخصصة",
+      description: "إنشاء تقارير حسب احتياجاتك",
+      color: "from-cyan-500 to-blue-500"
     },
     {
-      icon: Calendar,
-      title: "تقويم ذكي",
-      description: "رؤية شاملة للحجوزات والأسعار"
+      icon: Zap,
+      title: "أداء سريع",
+      description: "واجهة سريعة وسلسة",
+      color: "from-amber-500 to-yellow-500"
     },
     {
-      icon: Building2,
-      title: "إدارة متعددة",
-      description: "تحكم في مئات العقارات من لوحة واحدة"
+      icon: CheckCircle2,
+      title: "سهولة الاستخدام",
+      description: "واجهة بسيطة وسهلة التعلم",
+      color: "from-lime-500 to-green-500"
     },
     {
-      icon: FileText,
-      title: "تقارير الملاك",
-      description: "كشوفات شهرية تلقائية للملاك مع الإيرادات"
-    },
+      icon: Bell,
+      title: "إشعارات فورية",
+      description: "تنبيهات لحظية لجميع الأحداث المهمة",
+      color: "from-violet-500 to-purple-500"
+    }
   ];
 
   return (
-    <section id="features" className="py-24 bg-muted/20">
-      <div className="container mx-auto px-6">
+    <section id="features" className="py-24 bg-background relative overflow-hidden">
+      {/* Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-muted/30 via-background to-muted/30 pointer-events-none"></div>
+      
+      <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16 animate-fade-in-up">
-          <span className="text-primary font-bold text-sm tracking-wider">لماذا داريوم؟</span>
-          <h2 className="text-5xl font-black mt-4 mb-6">
-            منصة شاملة لكل احتياجاتك
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-6">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            مميزات المنصة
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-black mb-6">
+            <span className="text-gradient">منصة شاملة</span>
+            <br />
+            <span className="text-foreground">لكل احتياجاتك</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             كل ما تحتاجه لإدارة عقاراتك المؤجرة بكفاءة واحترافية في مكان واحد
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="glass rounded-2xl p-8 hover:shadow-xl transition-all group cursor-pointer animate-scale-in glow-hover"
-              style={{animationDelay: `${index * 50}ms`}}
+              className="glass rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group hover:-translate-y-2 animate-fade-in-up border border-border/50"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all">
-                <feature.icon className="w-8 h-8 text-white" />
+              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} p-3 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg`}>
+                <feature.icon className="w-full h-full text-white" />
               </div>
-              <h3 className="font-bold text-xl mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
             </div>

@@ -50,12 +50,22 @@
   
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "dlig" 1;
     font-family: 'Tajawal', -apple-system, sans-serif;
+    /* إظهار التشكيل (النقاط والحركات) في النصوص العربية */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6, p, span, div {
+    font-family: 'Tajawal', -apple-system, sans-serif;
+    /* تفعيل عرض جميع الأشكال الطباعية بما في ذلك التشكيل */
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "dlig" 1;
+    font-variant-ligatures: common-ligatures discretionary-ligatures;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Tajawal', -apple-system, sans-serif;
     font-weight: 700;
   }
   

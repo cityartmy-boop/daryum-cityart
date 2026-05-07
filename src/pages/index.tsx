@@ -8,7 +8,6 @@ import { ProblemSolution } from "@/components/landing/ProblemSolution";
 import { Features } from "@/components/landing/Features";
 import { RoleBenefits } from "@/components/landing/RoleBenefits";
 import { AISection } from "@/components/landing/AISection";
-import { OperationsSection } from "@/components/landing/OperationsSection";
 import { OwnerReporting } from "@/components/landing/OwnerReporting";
 import { PricingPlans } from "@/components/landing/PricingPlans";
 import { Testimonials } from "@/components/landing/Testimonials";
@@ -32,7 +31,6 @@ export default function Home() {
         <HowItWorks />
         <RoleBenefits />
         <AISection />
-        <OperationsSection />
         <OwnerReporting />
         <PricingPlans />
         <Testimonials />
