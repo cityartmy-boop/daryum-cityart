@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Building2, Mail, Phone, MapPin } from "lucide-react";
 
 export function Footer() {
@@ -29,17 +30,20 @@ export function Footer() {
   };
   
   return (
-    <footer className="bg-secondary text-white pt-16 pb-8">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-display">PropTech</span>
-            </div>
+    <footer className="bg-secondary text-secondary-foreground pt-16 pb-8">
+      <div className="container mx-auto px-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          {/* Company Info */}
+          <div>
+            <Link href="/" className="inline-block mb-6">
+              <Image 
+                src="/daryum-logo.png" 
+                alt="داريوم" 
+                width={140}
+                height={40}
+                className="h-10 w-auto brightness-0 invert"
+              />
+            </Link>
             <p className="text-white/70 mb-6 leading-relaxed">
               نظام تشغيل متكامل لإدارة العقارات المؤجرة في السعودية. مزامنة فورية، تحليلات ذكية، وعمليات سلسة.
             </p>

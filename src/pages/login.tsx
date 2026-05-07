@@ -34,25 +34,23 @@ export default function Login() {
 
   return (
     <>
-      <SEO title="تسجيل الدخول - داريوم" description="سجل دخولك لإدارة عقاراتك المؤجرة" />
+      <SEO title="تسجيل الدخول - داريوم" />
       
-      <div className="min-h-screen gradient-soft flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="glass rounded-2xl p-8 animate-scale-in">
-            {/* Logo */}
-            <div className="text-center mb-8">
-              <Link href="/">
-                <Image 
-                  src="/ChatGPT_Image_May_7_2026_09_50_18_AM.png" 
-                  alt="داريوم" 
-                  width={180}
-                  height={50}
-                  className="h-12 w-auto mx-auto mb-4"
-                />
-              </Link>
-              <h1 className="text-3xl font-bold mb-2">مرحباً بعودتك</h1>
-              <p className="text-muted-foreground">سجل دخولك لإدارة عقاراتك</p>
-            </div>
+      <div className="min-h-screen flex">
+        {/* Left Side - Login Form */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            <Link href="/" className="inline-block mb-8">
+              <Image 
+                src="/daryum-logo.png" 
+                alt="داريوم" 
+                width={160}
+                height={50}
+                className="h-12 w-auto"
+              />
+            </Link>
+            <h1 className="text-3xl font-bold mb-2">مرحباً بعودتك</h1>
+            <p className="text-muted-foreground">سجل دخولك لإدارة عقاراتك</p>
 
             {/* Error Message */}
             {error && (

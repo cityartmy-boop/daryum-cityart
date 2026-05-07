@@ -58,25 +58,23 @@ export default function Register() {
 
   return (
     <>
-      <SEO title="إنشاء حساب - داريوم" description="أنشئ حسابك وابدأ إدارة عقاراتك بذكاء" />
+      <SEO title="إنشاء حساب - داريوم" />
       
-      <div className="min-h-screen gradient-soft flex items-center justify-center p-4 py-12">
-        <div className="w-full max-w-md">
-          <div className="glass rounded-2xl p-8 animate-scale-in">
-            {/* Logo */}
-            <div className="text-center mb-8">
-              <Link href="/">
-                <Image 
-                  src="/ChatGPT_Image_May_7_2026_09_50_18_AM.png" 
-                  alt="داريوم" 
-                  width={180}
-                  height={50}
-                  className="h-12 w-auto mx-auto mb-4"
-                />
-              </Link>
-              <h1 className="text-3xl font-bold mb-2">إنشاء حساب جديد</h1>
-              <p className="text-muted-foreground">انضم لآلاف مدراء العقارات</p>
-            </div>
+      <div className="min-h-screen flex">
+        {/* Left Side - Registration Form */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            <Link href="/" className="inline-block mb-8">
+              <Image 
+                src="/daryum-logo.png" 
+                alt="داريوم" 
+                width={160}
+                height={50}
+                className="h-12 w-auto"
+              />
+            </Link>
+            <h1 className="text-3xl font-bold mb-2">إنشاء حساب جديد</h1>
+            <p className="text-muted-foreground">انضم لآلاف مدراء العقارات</p>
 
             {/* Error Message */}
             {error && (
