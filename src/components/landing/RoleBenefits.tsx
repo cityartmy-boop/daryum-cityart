@@ -1,88 +1,106 @@
-import { Crown, Users, DollarSign, Calculator } from "lucide-react";
+import { Crown, Users, DollarSign, Calculator, ClipboardCheck, Wrench } from "lucide-react";
 
 export function RoleBenefits() {
   const roles = [
     {
       icon: Crown,
-      role: "المدير التنفيذي",
-      roleEn: "Admin / Executive",
+      title: "المدير التنفيذي",
+      color: "from-primary to-primary/80",
       benefits: [
-        "رؤية شاملة للأداء المالي والتشغيلي لكامل المحفظة",
-        "تحليلات ذكية لاتخاذ قرارات استراتيجية سريعة",
-        "تتبع الإيرادات والإشغال والعائد على الاستثمار بدقة",
-      ],
-      color: "primary",
+        "نظرة شاملة على الأداء المالي",
+        "تقارير تحليلية متقدمة",
+        "مؤشرات الأداء الرئيسية (KPIs)",
+        "توقعات الإيرادات والإشغال"
+      ]
     },
     {
       icon: Users,
-      role: "مدير العقارات",
-      roleEn: "Property Manager",
+      title: "مدير العقارات",
+      color: "from-secondary to-secondary/80",
       benefits: [
-        "متابعة العمليات اليومية من لوحة واحدة",
-        "إدارة فرق التنظيف والصيانة بكفاءة عالية",
-        "الرد على رسائل الضيوف بسرعة مع اقتراحات ذكية",
-      ],
-      color: "occupied",
+        "إدارة الحجوزات والضيوف",
+        "جدولة التنظيف والصيانة",
+        "رسائل موحدة من جميع القنوات",
+        "متابعة العمليات اليومية"
+      ]
     },
     {
       icon: DollarSign,
-      role: "المالك",
-      roleEn: "Owner",
+      title: "الملاك",
+      color: "from-accent to-accent/80",
       benefits: [
-        "بيانات شفافة عن إيرادات ومصروفات وحداتك",
-        "تقارير دورية منتظمة ودقيقة",
-        "متابعة الأداء والإشغال في الوقت الفعلي",
-      ],
-      color: "primary",
+        "كشوف حساب شهرية تلقائية",
+        "تتبع الإيرادات والمصروفات",
+        "تقارير أداء الوحدات",
+        "شفافية كاملة في العمليات"
+      ]
     },
     {
       icon: Calculator,
-      role: "المحاسب",
-      roleEn: "Accountant",
+      title: "المحاسب",
+      color: "from-primary to-accent",
       benefits: [
-        "تسوية مالية دقيقة لجميع المعاملات",
-        "تقارير ضريبة القيمة المضافة جاهزة",
-        "تتبع أرصدة الملاك ودورات الصرف",
-      ],
-      color: "secondary",
+        "تسوية مالية دقيقة",
+        "تقارير ضريبة القيمة المضافة",
+        "أرصدة الملاك والعمولات",
+        "تصدير البيانات المالية"
+      ]
+    },
+    {
+      icon: ClipboardCheck,
+      title: "فريق التنظيف",
+      color: "from-cleaning to-cleaning/80",
+      benefits: [
+        "قائمة مهام يومية واضحة",
+        "جدول زمني للوحدات",
+        "تأكيد إتمام التنظيف",
+        "تحميل صور قبل وبعد"
+      ]
+    },
+    {
+      icon: Wrench,
+      title: "فريق الصيانة",
+      color: "from-maintenance to-maintenance/80",
+      benefits: [
+        "تذاكر الصيانة المفتوحة",
+        "مستوى الأولوية والاستعجال",
+        "تتبع الوقت والتكاليف",
+        "إضافة ملاحظات وصور"
+      ]
     },
   ];
-  
+
   return (
-    <section className="py-24 bg-white">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-display text-secondary mb-4">
+    <section id="solutions" className="py-24 bg-gradient-to-b from-muted/20 to-background">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-16 animate-fade-in-up">
+          <span className="text-primary font-bold text-sm tracking-wider">الحلول</span>
+          <h2 className="text-5xl font-black mt-4 mb-6">
             حل مصمم لكل دور
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            واجهات وصلاحيات مخصصة لكل مستخدم في فريقك
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            صلاحيات وواجهات مخصصة لكل عضو في فريقك
           </p>
         </div>
-        
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {roles.map((role, i) => (
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {roles.map((role, index) => (
             <div 
-              key={i} 
-              className="bg-gradient-to-br from-background to-white rounded-2xl p-8 border border-border hover:shadow-xl transition-all duration-300"
+              key={index}
+              className="glass rounded-3xl p-8 hover:shadow-2xl transition-all group animate-scale-in glow-hover"
+              style={{animationDelay: `${index * 100}ms`}}
             >
-              <div className="flex items-center gap-4 mb-6">
-                <div className={`w-16 h-16 rounded-2xl bg-${role.color}/10 flex items-center justify-center`}>
-                  <role.icon className={`w-8 h-8 text-${role.color}`} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-display text-secondary">{role.role}</h3>
-                  <p className="text-sm text-muted-foreground">{role.roleEn}</p>
-                </div>
+              <div className={`w-20 h-20 bg-gradient-to-br ${role.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg`}>
+                <role.icon className="w-10 h-10 text-white" />
               </div>
               
+              <h3 className="text-2xl font-black mb-4">{role.title}</h3>
+              
               <ul className="space-y-3">
-                {role.benefits.map((benefit, j) => (
-                  <li key={j} className="flex items-start gap-3">
-                    <div className={`w-5 h-5 rounded-full bg-${role.color}/20 flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                      <div className={`w-2 h-2 rounded-full bg-${role.color}`} />
-                    </div>
-                    <span className="text-muted-foreground">{benefit}</span>
+                {role.benefits.map((benefit, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                    <span className="text-muted-foreground leading-relaxed">{benefit}</span>
                   </li>
                 ))}
               </ul>

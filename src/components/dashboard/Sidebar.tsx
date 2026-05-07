@@ -46,7 +46,7 @@ export function Sidebar() {
       <div className="p-6 border-b border-border/50">
         <Link href="/" className="flex items-center gap-3">
           <Image 
-            src="/ChatGPT_Image_May_7_2026_09_50_18_AM.png" 
+            src="/daryum-logo.png" 
             alt="داريوم" 
             width={140}
             height={40}

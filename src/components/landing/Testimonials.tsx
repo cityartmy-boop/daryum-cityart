@@ -3,95 +3,75 @@ import { Quote, Star } from "lucide-react";
 export function Testimonials() {
   const testimonials = [
     {
-      quote: "قبل استخدام المنصة، كنا نضيع ساعات يومياً في التنسيق بين القنوات. الآن كل شيء تلقائي ومتزامن. زادت إيراداتنا بنسبة 23% في أول ثلاثة أشهر.",
-      author: "فهد العتيبي",
-      role: "مدير عام",
-      company: "مجموعة الخليج للعقارات",
-      units: "87 وحدة",
+      name: "أحمد السعيد",
+      role: "مدير عقارات",
+      company: "مجموعة الرياض للعقارات",
+      image: "أ",
       rating: 5,
+      text: "داريوم غيّرت طريقة إدارتنا للعقارات بالكامل. الآن نتابع 42 عقاراً من لوحة واحدة بكل سلاسة."
     },
     {
-      quote: "التقارير المالية للملاك كانت كابوساً شهرياً. الآن نُصدّر تقارير احترافية بضغطة زر. الملاك سعداء والمحاسب أسعد.",
-      author: "نورة الشمري",
-      role: "مديرة عمليات",
-      company: "شركة النخيل للضيافة",
-      units: "42 وحدة",
+      name: "فاطمة الغامدي",
+      role: "صاحبة عقارات",
+      company: "شقق الربوة الفاخرة",
+      image: "ف",
       rating: 5,
+      text: "التقارير الشهرية للملاك دقيقة وواضحة. أخيراً أستطيع متابعة إيرادات عقاراتي بشفافية كاملة."
     },
     {
-      quote: "المنصة فهمت احتياجاتنا كمشغلين سعوديين. الواجهة العربية ممتازة، دعم ضريبة القيمة المضافة مدمج، والتكاملات مع القنوات العالمية سلسة.",
-      author: "خالد المطيري",
-      role: "مؤسس",
-      company: "مؤسسة الرياض للشقق المفروشة",
-      units: "156 وحدة",
+      name: "خالد العتيبي",
+      role: "مدير عمليات",
+      company: "فنادق الدار",
+      image: "خ",
       rating: 5,
+      text: "المزامنة مع Airbnb وBooking.com فورية ودقيقة. وفرنا ساعات من العمل اليدوي كل يوم."
     },
   ];
-  
+
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-background">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <section className="py-24 bg-gradient-to-b from-muted/20 to-background">
+      <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-display text-secondary mb-4">
-            ثقة مشغلين سعوديين محترفين
+          <span className="text-primary font-bold text-sm tracking-wider">شهادات العملاء</span>
+          <h2 className="text-5xl font-black mt-4 mb-6">
+            ثقة مشغّلين سعوديين محترفين
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            مئات المحافظ العقارية تدار عبر المنصة بكفاءة عالية
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            اكتشف كيف ساعدت داريوم مدراء العقارات على زيادة كفاءتهم التشغيلية
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, i) => (
+          {testimonials.map((testimonial, index) => (
             <div 
-              key={i} 
-              className="bg-white rounded-2xl p-8 border border-border hover:shadow-xl transition-all duration-300 relative"
+              key={index}
+              className="glass rounded-3xl p-8 hover:shadow-2xl transition-all animate-scale-in glow-hover"
+              style={{animationDelay: `${index * 150}ms`}}
             >
-              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Quote className="w-6 h-6 text-primary" />
-              </div>
+              <Quote className="w-12 h-12 text-primary/20 mb-4" />
               
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: testimonial.rating }).map((_, j) => (
-                  <Star key={j} className="w-4 h-4 fill-accent text-accent" />
+              <div className="flex gap-1 mb-6">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 fill-accent text-accent" />
                 ))}
               </div>
-              
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                "{testimonial.quote}"
+
+              <p className="text-lg text-foreground leading-relaxed mb-8">
+                "{testimonial.text}"
               </p>
-              
-              <div className="pt-6 border-t border-border">
-                <div className="font-display text-lg text-secondary mb-1">
-                  {testimonial.author}
+
+              <div className="flex items-center gap-4 pt-6 border-t border-border">
+                <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                  {testimonial.image}
                 </div>
-                <div className="text-sm text-muted-foreground mb-2">
-                  {testimonial.role} — {testimonial.company}
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-                  {testimonial.units}
+                <div className="flex-1 text-right">
+                  <div className="font-bold text-lg">{testimonial.name}</div>
+                  <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                  <div className="text-sm text-primary font-semibold">{testimonial.company}</div>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-        
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-8 px-8 py-6 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20">
-            <div className="text-center">
-              <div className="text-4xl font-display font-bold text-primary tabular-nums">350+</div>
-              <div className="text-sm text-muted-foreground mt-1">محفظة عقارية نشطة</div>
-            </div>
-            <div className="w-px h-12 bg-border" />
-            <div className="text-center">
-              <div className="text-4xl font-display font-bold text-primary tabular-nums">12,400+</div>
-              <div className="text-sm text-muted-foreground mt-1">وحدة سكنية</div>
-            </div>
-            <div className="w-px h-12 bg-border" />
-            <div className="text-center">
-              <div className="text-4xl font-display font-bold text-primary tabular-nums">98.4%</div>
-              <div className="text-sm text-muted-foreground mt-1">معدل الرضا</div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
