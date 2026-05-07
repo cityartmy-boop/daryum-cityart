@@ -1,108 +1,149 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Building2, Calendar, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Building2, TrendingUp } from "lucide-react";
+import Image from "next/image";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 pt-20 pb-24 lg:pt-32 lg:pb-32">
-      <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,transparent,black)] -z-10" />
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Gradient Background */}
+      <div className="absolute inset-0 gradient-soft opacity-50"></div>
       
-      <div className="container mx-auto px-4 max-w-7xl">
+      {/* Animated Circles */}
+      <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float"></div>
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-float delay-300"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Copy */}
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold">
-              <Sparkles className="w-4 h-4" />
-              <span>منصة سعودية رائدة في إدارة العقارات</span>
+          {/* Content */}
+          <div className="text-right space-y-8 animate-fade-in-up">
+            {/* Logo */}
+            <div className="flex justify-end mb-6">
+              <Image 
+                src="/ChatGPT_Image_May_7_2026_09_50_18_AM.png" 
+                alt="داريوم" 
+                width={180}
+                height={60}
+                className="h-16 w-auto"
+              />
             </div>
             
-            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-display leading-tight text-secondary">
-              منصة متكاملة لإدارة عقاراتك المؤجرة
-              <span className="text-primary"> بذكاء</span>
+            {/* Badge */}
+            <div className="flex justify-end">
+              <span className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-medium">
+                <Sparkles className="w-4 h-4 text-primary" />
+                منصة سعودية مدعومة بالذكاء الاصطناعي
+              </span>
+            </div>
+            
+            {/* Headline */}
+            <h1 className="text-5xl lg:text-7xl font-black leading-tight">
+              <span className="text-gradient">نظام تشغيل</span>
+              <br />
+              عقاراتك المؤجرة
             </h1>
             
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-              أدر محفظتك العقارية بالكامل من لوحة واحدة. مزامنة فورية للحجوزات، الأسعار، الرسائل، التقارير المالية، والعمليات التشغيلية. مصممة خصيصاً للسوق السعودي.
+            {/* Subheadline */}
+            <p className="text-xl lg:text-2xl text-muted-foreground leading-relaxed">
+              أدِر محفظتك العقارية بالكامل من لوحة واحدة — حجوزات، تسعير، رسائل، تنظيف، صيانة، وتقارير مالية ذكية مع ضريبة القيمة المضافة.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-white">
-                ابدأ تجربة مجانية
-                <ArrowRight className="mr-2 h-5 w-5" />
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-6 py-6">
+              <div className="text-center glass p-4 rounded-2xl glow-hover">
+                <div className="text-3xl font-black text-gradient">2.4M+</div>
+                <div className="text-sm text-muted-foreground mt-1">إجمالي الحجوزات</div>
+              </div>
+              <div className="text-center glass p-4 rounded-2xl glow-hover">
+                <div className="text-3xl font-black text-gradient">850+</div>
+                <div className="text-sm text-muted-foreground mt-1">عقار نشط</div>
+              </div>
+              <div className="text-center glass p-4 rounded-2xl glow-hover">
+                <div className="text-3xl font-black text-gradient">98.4%</div>
+                <div className="text-sm text-muted-foreground mt-1">رضا العملاء</div>
+              </div>
+            </div>
+            
+            {/* CTAs */}
+            <div className="flex gap-4 justify-end">
+              <Button size="lg" className="gradient-primary text-white hover:opacity-90 transition-opacity glow-hover group text-lg px-8 py-6">
+                ابدأ مجانًا الآن
+                <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2">
-                احجز عرضاً توضيحياً
+              <Button size="lg" variant="outline" className="glass border-2 hover:bg-white/80 text-lg px-8 py-6">
+                شاهد العرض التوضيحي
               </Button>
             </div>
             
             {/* Trust Indicators */}
-            <div className="pt-8 border-t border-border">
-              <p className="text-sm text-muted-foreground mb-4">متكامل مع أفضل القنوات العالمية</p>
-              <div className="flex flex-wrap items-center gap-8">
-                <div className="text-secondary font-semibold">Airbnb</div>
-                <div className="text-secondary font-semibold">Booking.com</div>
-                <div className="text-secondary font-semibold">Agoda</div>
-                <div className="text-secondary font-semibold">Vrbo</div>
-                <div className="text-secondary font-semibold">Expedia</div>
-              </div>
+            <div className="flex items-center gap-4 justify-end text-sm text-muted-foreground">
+              <span>✓ بدون بطاقة ائتمان</span>
+              <span>✓ 14 يوم تجربة مجانية</span>
+              <span>✓ دعم فني سريع</span>
             </div>
           </div>
           
-          {/* Right Column - Dashboard Preview */}
-          <div className="relative">
-            <div className="relative bg-white rounded-2xl shadow-2xl border border-border p-6 transform rotate-1 hover:rotate-0 transition-transform duration-300">
-              {/* Dashboard Preview - KPI Cards */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-primary to-primary/80 rounded-xl p-5 text-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 className="w-5 h-5" />
-                    <span className="text-sm opacity-90">الإيرادات الإجمالية</span>
+          {/* Visual */}
+          <div className="relative lg:block hidden animate-fade-in-up delay-300">
+            <div className="glass rounded-3xl p-8 glow">
+              <div className="bg-gradient-primary rounded-2xl p-6 text-white space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                      <Building2 className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="text-sm opacity-90">لوحة التحكم الرئيسية</div>
+                      <div className="text-2xl font-black">داريوم</div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-display font-bold tabular-nums">2.48M ر.س</div>
-                  <div className="text-sm opacity-80 mt-1">+18.4% عن الشهر الماضي</div>
+                  <div className="text-left">
+                    <div className="text-sm opacity-90">الإيرادات الشهرية</div>
+                    <div className="text-2xl font-black">2.48M ر.س</div>
+                  </div>
                 </div>
                 
-                <div className="bg-gradient-to-br from-occupied to-occupied/80 rounded-xl p-5 text-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="w-5 h-5" />
-                    <span className="text-sm opacity-90">معدل الإشغال</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <div className="text-sm opacity-90">معدل الإشغال</div>
+                    <div className="text-3xl font-black mt-2">84.2%</div>
+                    <div className="flex items-center gap-1 mt-2 text-sm">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>+5.2%</span>
+                    </div>
                   </div>
-                  <div className="text-3xl font-display font-bold tabular-nums">78.4%</div>
-                  <div className="text-sm opacity-80 mt-1">+5.2% عن الشهر الماضي</div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                    <div className="text-sm opacity-90">متوسط السعر</div>
+                    <div className="text-3xl font-black mt-2">612 ر.س</div>
+                    <div className="flex items-center gap-1 mt-2 text-sm">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>+8.1%</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              {/* Chart Preview */}
-              <div className="bg-muted/30 rounded-xl p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-semibold text-secondary">اتجاه الإيرادات</span>
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                </div>
-                <div className="h-32 flex items-end gap-2">
-                  {[286, 301, 328, 355, 389, 421].map((value, i) => (
-                    <div key={i} className="flex-1 bg-gradient-to-t from-primary to-primary/40 rounded-t" style={{ height: `${(value / 500) * 100}%` }} />
-                  ))}
-                </div>
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>يناير</span>
-                  <span>يونيو</span>
-                </div>
-              </div>
-              
-              <div className="mt-4 text-center text-sm text-muted-foreground">
-                لوحة تحكم تنفيذية بمؤشرات حقيقية
-              </div>
-            </div>
-            
-            {/* Floating AI Insight Card */}
-            <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl border border-border p-4 max-w-xs transform -rotate-2 hover:rotate-0 transition-transform duration-300">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <div className="text-sm">
-                  <div className="font-semibold text-secondary mb-1">توصية ذكية</div>
-                  <div className="text-muted-foreground">نقترح رفع السعر بنسبة 8% في عطلة نهاية الأسبوع القادمة</div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-available"></div>
+                      <span className="text-sm">حجوزات اليوم</span>
+                    </div>
+                    <span className="font-bold">12</span>
+                  </div>
+                  <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-cleaning"></div>
+                      <span className="text-sm">مهام التنظيف</span>
+                    </div>
+                    <span className="font-bold">8</span>
+                  </div>
+                  <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-maintenance"></div>
+                      <span className="text-sm">طلبات الصيانة</span>
+                    </div>
+                    <span className="font-bold">3</span>
+                  </div>
                 </div>
               </div>
             </div>
