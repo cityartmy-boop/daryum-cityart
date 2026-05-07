@@ -1,12 +1,31 @@
-import React from 'react'
+import { SEO } from "@/components/SEO";
+import { Hero } from "@/components/landing/Hero";
+import { ProblemSolution } from "@/components/landing/ProblemSolution";
+import { Features } from "@/components/landing/Features";
+import { RoleBenefits } from "@/components/landing/RoleBenefits";
+import { AISection } from "@/components/landing/AISection";
+import { SaudiSection } from "@/components/landing/SaudiSection";
+import { FinalCTA } from "@/components/landing/FinalCTA";
+import { Footer } from "@/components/landing/Footer";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-foreground">Hello World</h1>
-        <p className="text-lg text-muted-foreground">This is going to be your softgen app, start by describing your project.</p>
-      </div>
-    </main>
-  )
+    <>
+      <SEO 
+        title="PropTech — نظام متكامل لإدارة العقارات المؤجرة"
+        description="منصة سعودية رائدة لإدارة العقارات والوحدات المؤجرة. مزامنة فورية للحجوزات، تحليلات ذكية، وعمليات تشغيلية سلسة."
+      />
+      
+      <main className="min-h-screen">
+        <Hero />
+        <ProblemSolution />
+        <Features />
+        <RoleBenefits />
+        <AISection />
+        <SaudiSection />
+        <FinalCTA />
+        <Footer />
+      </main>
+    </>
+  );
 }
