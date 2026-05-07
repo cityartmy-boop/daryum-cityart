@@ -49,9 +49,9 @@ export function RecentReservations() {
   ];
 
   const statusColors = {
-    confirmed: "bg-emerald-100 text-emerald-700",
-    "checked-in": "bg-blue-100 text-blue-700",
-    pending: "bg-amber-100 text-amber-700",
+    confirmed: "bg-primary/10 text-primary border border-primary/20",
+    "checked-in": "bg-blue-100 text-blue-700 border border-blue-200",
+    pending: "bg-accent/10 text-accent-foreground border border-accent/20",
   };
 
   return (
@@ -68,11 +68,11 @@ export function RecentReservations() {
       
       <div className="space-y-4">
         {reservations.map((res) => (
-          <div key={res.id} className="flex items-center gap-4 p-4 rounded-xl glass-dark hover:bg-white/50 transition-colors">
+          <div key={res.id} className="flex items-center gap-4 p-4 rounded-xl glass-dark hover:bg-white/50 transition-all hover:scale-[1.02]">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
                 <span className="font-bold text-sm text-muted-foreground">{res.id}</span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[res.status as keyof typeof statusColors]}`}>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[res.status as keyof typeof statusColors]}`}>
                   {res.status === "confirmed" ? "مؤكد" : res.status === "checked-in" ? "وصل" : "معلق"}
                 </span>
                 <span className="text-xs text-muted-foreground">{res.channel}</span>
@@ -98,8 +98,8 @@ export function RecentReservations() {
             </div>
             
             <div className="text-left">
-              <div className="flex items-center gap-1 text-lg font-bold tabular-nums">
-                <DollarSign className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-1 text-lg font-bold tabular-nums text-primary">
+                <DollarSign className="w-5 h-5" />
                 {res.total.toLocaleString()} ر.س
               </div>
             </div>

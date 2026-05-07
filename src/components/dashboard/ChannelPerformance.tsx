@@ -22,8 +22,8 @@ export function ChannelPerformance() {
         <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(200, 95%, 55%)" />
-              <stop offset="100%" stopColor="hsl(260, 60%, 55%)" />
+              <stop offset="0%" stopColor="hsl(174, 100%, 29%)" />
+              <stop offset="100%" stopColor="hsl(38, 70%, 55%)" />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
