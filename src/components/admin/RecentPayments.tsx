@@ -128,9 +128,9 @@ export function RecentPayments() {
           </thead>
           <tbody>
             {payments.map((payment, index) => (
-              <tr key={index} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+              <tr key={index} className="border-b border-border/50 hover:bg-primary/5 transition-colors">
                 <td className="py-4 pr-4 font-medium">{payment.company}</td>
-                <td className="py-4 px-4 font-bold text-lg tabular-nums">{payment.amount}</td>
+                <td className="py-4 px-4 font-bold text-lg tabular-nums text-primary">{payment.amount}</td>
                 <td className="py-4 px-4 text-sm text-muted-foreground">{payment.plan}</td>
                 <td className="py-4 px-4 text-sm">
                   <div className="tabular-nums">{payment.date}</div>

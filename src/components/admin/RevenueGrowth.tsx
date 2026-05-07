@@ -18,11 +18,11 @@ export function RevenueGrowth() {
         <h3 className="text-2xl font-bold mb-2 text-right">نمو الإيرادات</h3>
         <div className="flex gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-primary"></div>
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-[hsl(174,100%,29%)] to-[hsl(174,80%,40%)]"></div>
             <span className="text-muted-foreground">الإيرادات الشهرية (MRR)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-secondary"></div>
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-[hsl(210,100%,12%)] to-[hsl(210,100%,25%)]"></div>
             <span className="text-muted-foreground">الإيرادات السنوية (ARR)</span>
           </div>
         </div>
@@ -33,29 +33,29 @@ export function RevenueGrowth() {
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorMRR" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="hsl(174, 100%, 29%)" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="hsl(174, 100%, 29%)" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorARR" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="hsl(210, 100%, 12%)" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="hsl(210, 100%, 12%)" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
             <XAxis 
               dataKey="month" 
-              stroke="#9ca3af"
+              stroke="hsl(var(--muted-foreground))"
               style={{ fontSize: '12px', fontFamily: 'Tajawal' }}
             />
             <YAxis 
-              stroke="#9ca3af"
+              stroke="hsl(var(--muted-foreground))"
               style={{ fontSize: '12px', direction: 'ltr' }}
               tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: 'none',
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
                 borderRadius: '12px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 direction: 'rtl'
@@ -66,7 +66,7 @@ export function RevenueGrowth() {
             <Area
               type="monotone"
               dataKey="mrr"
-              stroke="hsl(var(--primary))"
+              stroke="hsl(174, 100%, 29%)"
               fillOpacity={1}
               fill="url(#colorMRR)"
               strokeWidth={3}
@@ -74,7 +74,7 @@ export function RevenueGrowth() {
             <Area
               type="monotone"
               dataKey="arr"
-              stroke="hsl(var(--secondary))"
+              stroke="hsl(210, 100%, 12%)"
               fillOpacity={1}
               fill="url(#colorARR)"
               strokeWidth={3}

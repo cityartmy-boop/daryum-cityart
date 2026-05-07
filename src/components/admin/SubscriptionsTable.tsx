@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { Building2, Calendar, DollarSign } from "lucide-react";
 
 export function SubscriptionsTable() {
   const subscriptions = [
@@ -103,7 +102,7 @@ export function SubscriptionsTable() {
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-2xl font-bold">الاشتراكات النشطة</h3>
         <div className="flex gap-2">
-          <button className="glass px-4 py-2 rounded-lg text-sm hover:bg-white/80 transition-colors">
+          <button className="glass px-4 py-2 rounded-lg text-sm hover:bg-primary/10 transition-colors font-medium">
             الكل
           </button>
           <button className="px-4 py-2 rounded-lg text-sm hover:bg-muted/50 transition-colors">
@@ -133,10 +132,10 @@ export function SubscriptionsTable() {
           </thead>
           <tbody>
             {subscriptions.map((sub, index) => (
-              <tr key={index} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+              <tr key={index} className="border-b border-border/50 hover:bg-primary/5 transition-colors">
                 <td className="py-4 pr-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[hsl(174,100%,29%)] to-[hsl(38,70%,55%)] flex items-center justify-center text-white font-bold shadow-lg">
                       {sub.company.charAt(0)}
                     </div>
                     <div>
@@ -150,7 +149,7 @@ export function SubscriptionsTable() {
                 </td>
                 <td className="py-4 px-4 tabular-nums">{sub.users}</td>
                 <td className="py-4 px-4 tabular-nums">{sub.properties}</td>
-                <td className="py-4 px-4 font-bold tabular-nums">{sub.mrr}</td>
+                <td className="py-4 px-4 font-bold tabular-nums text-primary">{sub.mrr}</td>
                 <td className="py-4 px-4">{getStatusBadge(sub.status)}</td>
                 <td className="py-4 px-4 text-sm text-muted-foreground tabular-nums">{sub.nextBilling}</td>
               </tr>

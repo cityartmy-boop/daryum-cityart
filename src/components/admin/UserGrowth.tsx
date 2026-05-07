@@ -1,6 +1,6 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export function UserGrowth() {
   const data = [
@@ -18,7 +18,7 @@ export function UserGrowth() {
         <h3 className="text-2xl font-bold mb-2 text-right">نمو المستخدمين</h3>
         <div className="flex gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-primary"></div>
+            <div className="w-3 h-3 rounded-full bg-[hsl(174,100%,29%)]"></div>
             <span className="text-muted-foreground">إجمالي المستخدمين</span>
           </div>
           <div className="flex items-center gap-2">
@@ -26,7 +26,7 @@ export function UserGrowth() {
             <span className="text-muted-foreground">المشتركين النشطين</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+            <div className="w-3 h-3 rounded-full bg-[hsl(38,70%,55%)]"></div>
             <span className="text-muted-foreground">التجارب المجانية</span>
           </div>
         </div>
@@ -35,20 +35,20 @@ export function UserGrowth() {
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
             <XAxis 
               dataKey="month" 
-              stroke="#9ca3af"
+              stroke="hsl(var(--muted-foreground))"
               style={{ fontSize: '12px', fontFamily: 'Tajawal' }}
             />
             <YAxis 
-              stroke="#9ca3af"
+              stroke="hsl(var(--muted-foreground))"
               style={{ fontSize: '12px', direction: 'ltr' }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: 'none',
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
                 borderRadius: '12px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 direction: 'rtl'
@@ -58,9 +58,9 @@ export function UserGrowth() {
             <Line
               type="monotone"
               dataKey="total"
-              stroke="hsl(var(--primary))"
+              stroke="hsl(174, 100%, 29%)"
               strokeWidth={3}
-              dot={{ r: 6, fill: 'hsl(var(--primary))' }}
+              dot={{ r: 6, fill: 'hsl(174, 100%, 29%)' }}
               activeDot={{ r: 8 }}
             />
             <Line
@@ -74,9 +74,9 @@ export function UserGrowth() {
             <Line
               type="monotone"
               dataKey="trial"
-              stroke="#f59e0b"
+              stroke="hsl(38, 70%, 55%)"
               strokeWidth={3}
-              dot={{ r: 6, fill: '#f59e0b' }}
+              dot={{ r: 6, fill: 'hsl(38, 70%, 55%)' }}
               activeDot={{ r: 8 }}
             />
           </LineChart>
