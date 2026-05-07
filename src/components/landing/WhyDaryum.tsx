@@ -17,44 +17,44 @@ export function WhyDaryum() {
   const features = [
     {
       icon: Sparkles,
-      title: "ذكاء اصطناعي متقدّم",
+      title: "ذكاء اصطناعي متقدم",
       description: "رؤى وتوصيات ذكية لتحسين الأداء",
       color: "from-purple-500 to-pink-500"
     },
     {
       icon: Globe,
-      title: "مزامنة مع جميع المنصّات",
+      title: "مزامنة مع جميع المنصات",
       description: "ربط تلقائي مع Airbnb وBooking.com وغيرها",
       color: "from-blue-500 to-cyan-500"
     },
     {
       icon: TrendingUp,
       title: "تحليلات شاملة",
-      description: "تقارير مفصّلة عن الأداء والإيرادات",
+      description: "تقارير مفصلة عن الأداء والإيرادات",
       color: "from-green-500 to-emerald-500"
     },
     {
       icon: DollarSign,
       title: "إدارة مالية متكاملة",
-      description: "متابعة الإيرادات والمدفوعات بدقّة",
+      description: "متابعة الإيرادات والمدفوعات بدقة",
       color: "from-yellow-500 to-orange-500"
     },
     {
       icon: MessageSquare,
-      title: "رسائل موحّدة",
+      title: "رسائل موحدة",
       description: "صندوق وارد واحد لجميع قنوات التواصل",
       color: "from-indigo-500 to-purple-500"
     },
     {
       icon: Users,
-      title: "إدارة الفِرَق",
-      description: "صلاحيات مخصّصة لكلّ عضو في الفريق",
+      title: "إدارة الفرق",
+      description: "صلاحيات مخصصة لكل عضو في الفريق",
       color: "from-pink-500 to-rose-500"
     },
     {
       icon: Clock,
       title: "أتمتة العمليات",
-      description: "توفير الوقت من خلال المهامّ التلقائية",
+      description: "توفير الوقت من خلال المهام التلقائية",
       color: "from-teal-500 to-green-500"
     },
     {
@@ -65,7 +65,7 @@ export function WhyDaryum() {
     },
     {
       icon: BarChart3,
-      title: "تقارير مخصّصة",
+      title: "تقارير مخصصة",
       description: "إنشاء تقارير حسب احتياجاتك",
       color: "from-cyan-500 to-blue-500"
     },
@@ -78,13 +78,13 @@ export function WhyDaryum() {
     {
       icon: CheckCircle2,
       title: "سهولة الاستخدام",
-      description: "واجهة بسيطة وسهلة التعلّم",
+      description: "واجهة بسيطة وسهلة التعلم",
       color: "from-lime-500 to-green-500"
     },
     {
       icon: Bell,
       title: "إشعارات فورية",
-      description: "تنبيهات لحظية لجميع الأحداث المهمّة",
+      description: "تنبيهات لحظية لجميع الأحداث المهمة",
       color: "from-violet-500 to-purple-500"
     }
   ];
@@ -98,17 +98,17 @@ export function WhyDaryum() {
         <div className="text-center mb-16 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-6 hover:scale-105 transition-transform duration-300">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-            مميّزات المنصّة
+            مميزات المنصة
           </div>
           <h2 className="text-4xl lg:text-5xl font-black mb-6">
             <span className="text-gradient bg-gradient-to-l from-primary via-secondary to-accent bg-clip-text text-transparent animate-gradient">
-              منصّة شاملة
+              منصة شاملة
             </span>
             <br />
-            <span className="text-foreground">لكلّ احتياجاتك</span>
+            <span className="text-foreground">لكل احتياجاتك</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            كلّ ما تحتاجه لإدارة عقاراتك المؤجّرة بكفاءة واحترافية في مكان واحد
+            كل ما تحتاجه لإدارة عقاراتك المؤجرة بكفاءة واحترافية في مكان واحد
           </p>
         </div>
 
