@@ -15,7 +15,11 @@ import {
   Zap,
   Settings,
   Shield,
-  User
+  User,
+  BookOpen,
+  Globe,
+  Bell,
+  Headphones
 } from "lucide-react";
 
 export function Sidebar() {
@@ -35,6 +39,8 @@ export function Sidebar() {
     { icon: Zap, label: "الأتمتة", href: "/dashboard/automations" },
     { icon: User, label: "الملف الشخصي", href: "/dashboard/profile" },
     { icon: Settings, label: "الإعدادات", href: "/dashboard/settings" },
+    { icon: Bell, label: "الإشعارات", href: "/dashboard/notifications" },
+    { icon: Headphones, label: "الدعم الفني", href: "/dashboard/support" },
   ];
 
   const adminMenu = [
