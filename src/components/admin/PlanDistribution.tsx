@@ -23,7 +23,7 @@ export function PlanDistribution() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ percentage }) => `${percentage.toFixed(1)}%`}
+                label={(props: any) => `${props.payload.percentage.toFixed(1)}%`}
                 outerRadius={100}
                 innerRadius={60}
                 fill="#8884d8"
