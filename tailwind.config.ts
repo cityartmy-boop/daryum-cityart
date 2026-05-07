@@ -55,7 +55,8 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Tajawal', 'system-ui', 'sans-serif'],
+        sans: ['Cairo', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
+        display: ['Cairo', 'Urbanist', 'system-ui', 'sans-serif'],
         mono: ['IBM Plex Mono', 'monospace'],
       },
     },

@@ -2,121 +2,58 @@ import Image from "next/image";
 
 export function Partners() {
   const partners = [
-    // Global OTAs
-    { 
-      name: "Airbnb", 
-      logo: "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg",
-      width: 120,
-      height: 40
-    },
-    { 
-      name: "Booking.com", 
-      logo: "https://cf.bstatic.com/static/img/booking_logo_knowledge_graph/247454a990efac1952e44dddbf30c58677aa0fd8.png",
-      width: 140,
-      height: 30
-    },
-    { 
-      name: "Expedia", 
-      logo: "https://www.expedia.com/_dms/header/logo.svg",
-      width: 120,
-      height: 30
-    },
-    { 
-      name: "Agoda", 
-      logo: "https://cdn6.agoda.net/images/kite-js/logo/agoda/color-default.svg",
-      width: 100,
-      height: 30
-    },
-    { 
-      name: "Vrbo", 
-      logo: "https://csvcus.homeaway.com/rsrcs/stab-cms-resources/0.10.18/images/vrbo/logos/vrbo-logo-dark.svg",
-      width: 80,
-      height: 30
-    },
-    { 
-      name: "Hotels.com", 
-      logo: "https://a.travel-assets.com/globalcontrols-service/content/f285fb631b0a976202ef57611c7050e9ef5ca51a/images/EG_Wordmark_blue_RGB.svg",
-      width: 110,
-      height: 30
-    },
+    // Global Booking Platforms
+    { name: "Airbnb", logo: "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_Bélo.svg" },
+    { name: "Booking.com", logo: "https://upload.wikimedia.org/wikipedia/commons/b/be/Booking.com_logo.svg" },
+    { name: "Expedia", logo: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Expedia_2012_logo.svg" },
+    { name: "Agoda", logo: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Agoda_transparent_logo.svg" },
+    { name: "Vrbo", logo: "https://upload.wikimedia.org/wikipedia/commons/4/41/Vrbo_logo.svg" },
+    { name: "Hotels.com", logo: "https://upload.wikimedia.org/wikipedia/commons/8/84/Hotels.com_logo.svg" },
     
     // Saudi Local Platforms
-    { 
-      name: "Almatar", 
-      logo: "https://www.almatar.com/static/version1736247972/frontend/Almatar/default/ar_SA/images/logo.svg",
-      width: 100,
-      height: 35
-    },
-    { 
-      name: "Almosafer", 
-      logo: "https://cdn.almosafer.com/assets/logo-ar.svg",
-      width: 100,
-      height: 35
-    },
-    
-    // Payment Gateways
-    { 
-      name: "Mada", 
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Mada_Logo.svg/2560px-Mada_Logo.svg.png",
-      width: 80,
-      height: 30
-    },
-    { 
-      name: "Visa", 
-      logo: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg",
-      width: 60,
-      height: 25
-    },
-    { 
-      name: "Mastercard", 
-      logo: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg",
-      width: 50,
-      height: 30
-    },
-    { 
-      name: "Apple Pay", 
-      logo: "https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg",
-      width: 50,
-      height: 30
-    },
+    { name: "Almatar", logo: "https://www.almatar.com/images/logo.svg" },
+    { name: "Almosafer", logo: "https://www.almosafer.com/images/logo.svg" },
   ];
 
   return (
-    <section className="py-16 bg-muted/30 overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="py-16 bg-muted/30 relative overflow-hidden">
+      {/* Background Decoration */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background pointer-events-none"></div>
+      
+      <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-12 animate-fade-in-up">
-          <h3 className="text-2xl font-bold text-foreground mb-2">
-            متكامل مع أشهر منصات الحجز والدفع
-          </h3>
-          <p className="text-muted-foreground">
-            اتصال سلس مع جميع القنوات العالمية والسعودية
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-4 hover:scale-105 transition-transform duration-300">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            تكاملات متقدمة
+          </div>
+          <h2 className="text-3xl lg:text-4xl font-black mb-4 text-foreground">
+            متكامل مع أشهر منصات الحجز
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            مزامنة تلقائية فورية مع جميع قنوات الحجز العالمية والسعودية
           </p>
         </div>
 
-        {/* Unified Partners Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        {/* Partners Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {partners.map((partner, index) => (
             <div
               key={index}
-              className="glass rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group hover:-translate-y-2 animate-fade-in-up border border-border/50 hover:border-primary/30"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="glass rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group hover:-translate-y-2 border border-border/50 hover:border-primary/30 flex items-center justify-center animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="relative h-16 w-full flex items-center justify-center">
+              <div className="relative w-full h-16 grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110">
                 <Image
                   src={partner.logo}
                   alt={partner.name}
-                  width={partner.width}
-                  height={partner.height}
-                  className="object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100 max-h-full w-auto"
+                  fill
+                  className="object-contain"
                   onError={(e) => {
-                    // Fallback if image fails to load
-                    e.currentTarget.style.display = 'none';
-                    const parent = e.currentTarget.parentElement;
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
                     if (parent) {
-                      const text = document.createElement('span');
-                      text.textContent = partner.name;
-                      text.className = 'text-sm font-bold text-foreground';
-                      parent.appendChild(text);
+                      parent.innerHTML = `<div class="flex items-center justify-center h-full font-bold text-foreground">${partner.name}</div>`;
                     }
                   }}
                 />
@@ -125,10 +62,10 @@ export function Partners() {
           ))}
         </div>
 
-        {/* Trust Badge */}
-        <div className="text-center mt-12 animate-fade-in">
-          <p className="text-sm text-muted-foreground">
-            وأكثر من 20+ منصة أخرى
+        {/* Bottom Text */}
+        <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '800ms' }}>
+          <p className="text-muted-foreground text-lg">
+            وأكثر من <span className="text-primary font-bold">20+ منصة</span> أخرى
           </p>
         </div>
       </div>
