@@ -106,14 +106,14 @@ export function Features() {
               className="glass rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group hover:-translate-y-2 border border-border/50 hover:border-primary/30 animate-fade-in-up"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} p-4 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                <feature.icon className="w-full h-full text-white" />
+              <div className={`w-16 h-16 rounded-xl ${feature.bgColor} p-4 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 flex items-center justify-center`}>
+                <feature.icon className={`w-8 h-8 ${feature.color}`} />
               </div>
               <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-                {feature.title}
+                {feature.titleAr}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                {feature.description}
+                {feature.descAr}
               </p>
             </div>
           ))}

@@ -60,8 +60,8 @@ export function HowItWorks() {
                 className="flex gap-6 items-start glass rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group hover:-translate-x-2 border border-border/50 hover:border-primary/30 animate-slide-in-left"
                 style={{ animationDelay: `${index * 200}ms` }}
               >
-                <div className={`flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center text-white text-2xl font-black shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-                  {step.number}
+                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-black shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                  {step.step}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
