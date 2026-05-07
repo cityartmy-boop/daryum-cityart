@@ -6,24 +6,24 @@
 
 @layer base {
   :root {
-    /* Daryum Brand Colors - من اللوجو */
-    --primary: 200 95% 55%; /* sky blue */
+    /* Daryum Brand Colors - من اللوجو الجديد */
+    --primary: 174 100% 29%; /* teal/cyan */
     --primary-foreground: 0 0% 100%;
-    --secondary: 260 60% 55%; /* purple/violet */
+    --secondary: 210 100% 12%; /* dark navy */
     --secondary-foreground: 0 0% 100%;
-    --accent: 280 65% 60%; /* vibrant purple */
-    --accent-foreground: 0 0% 100%;
-    --background: 220 25% 97%; /* very light blue-gray */
-    --foreground: 222 47% 11%; /* deep navy */
-    --muted: 220 20% 92%; /* soft gray */
-    --muted-foreground: 222 20% 40%;
+    --accent: 38 70% 55%; /* gold */
+    --accent-foreground: 210 100% 12%;
+    --background: 0 0% 98%; /* very light gray */
+    --foreground: 210 100% 12%; /* dark navy */
+    --muted: 210 20% 92%; /* soft gray */
+    --muted-foreground: 210 20% 40%;
     --card: 0 0% 100%; /* white cards */
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 210 100% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --border: 220 20% 88%; /* light border */
-    --input: 220 20% 88%;
-    --ring: 200 95% 55%; /* sky blue ring */
+    --popover-foreground: 210 100% 12%;
+    --border: 210 20% 88%; /* light border */
+    --input: 210 20% 88%;
+    --ring: 174 100% 29%; /* teal ring */
     --destructive: 0 84% 60%; /* coral */
     --destructive-foreground: 0 0% 100%;
     
@@ -32,7 +32,7 @@
     --occupied: 217 91% 60%; /* blue */
     --cleaning: 174 62% 47%; /* teal */
     --maintenance: 38 92% 50%; /* amber */
-    --blocked: 222 20% 40%; /* slate */
+    --blocked: 210 20% 40%; /* slate */
     
     --radius: 0.75rem;
   }
@@ -45,7 +45,7 @@
   
   html {
     scroll-behavior: smooth;
-    direction: rtl; /* RTL by default */
+    direction: rtl;
   }
   
   body {
@@ -71,15 +71,19 @@
 @layer utilities {
   /* Gradient backgrounds */
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(174 80% 40%) 100%);
+  }
+  
+  .gradient-secondary {
+    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(210 100% 20%) 100%);
   }
   
   .gradient-accent {
-    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--accent)) 100%);
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(38 80% 65%) 100%);
   }
   
-  .gradient-soft {
-    background: linear-gradient(135deg, hsl(200 95% 95%) 0%, hsl(260 60% 95%) 100%);
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(174 100% 29%) 0%, hsl(210 100% 12%) 50%, hsl(38 70% 55%) 100%);
   }
   
   /* Glass-morphism effect */
@@ -136,6 +140,17 @@
     }
   }
   
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
@@ -155,6 +170,11 @@
     opacity: 0;
   }
   
+  .animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out forwards;
+    opacity: 0;
+  }
+  
   /* Stagger delays */
   .delay-100 { animation-delay: 0.1s; }
   .delay-200 { animation-delay: 0.2s; }
@@ -167,7 +187,7 @@
   
   /* Text gradient */
   .text-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -175,11 +195,11 @@
   
   /* Glow effect */
   .glow {
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.3), 0 0 40px rgba(167, 139, 250, 0.2);
+    box-shadow: 0 0 20px rgba(0, 150, 136, 0.3), 0 0 40px rgba(255, 193, 7, 0.2);
   }
   
   .glow-hover:hover {
-    box-shadow: 0 0 30px rgba(96, 165, 250, 0.4), 0 0 60px rgba(167, 139, 250, 0.3);
+    box-shadow: 0 0 30px rgba(0, 150, 136, 0.4), 0 0 60px rgba(255, 193, 7, 0.3);
     transition: box-shadow 0.3s ease;
   }
 }

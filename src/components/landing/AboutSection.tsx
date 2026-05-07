@@ -1,61 +1,102 @@
-import { CheckCircle2 } from "lucide-react";
+import Image from "next/image";
+import { Building2, Users, TrendingUp, Shield, Zap, BarChart3 } from "lucide-react";
 
 export function AboutSection() {
+  const features = [
+    {
+      icon: Building2,
+      title: "إدارة شاملة",
+      description: "تحكم كامل في عقاراتك ووحداتك من مكان واحد"
+    },
+    {
+      icon: Users,
+      title: "تجربة سلسة",
+      description: "واجهة عربية بديهية مصممة للسوق السعودي"
+    },
+    {
+      icon: TrendingUp,
+      title: "نمو مستمر",
+      description: "أدوات تحليلية لزيادة إيراداتك ومعدلات الإشغال"
+    },
+    {
+      icon: Shield,
+      title: "أمان عالي",
+      description: "حماية متقدمة لبياناتك ومعلومات ضيوفك"
+    },
+    {
+      icon: Zap,
+      title: "أتمتة ذكية",
+      description: "وفر وقتك بأتمتة المهام المتكررة"
+    },
+    {
+      icon: BarChart3,
+      title: "تقارير دقيقة",
+      description: "تقارير مالية وتشغيلية مفصلة ودقيقة"
+    },
+  ];
+
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 gradient-primary"></div>
-      
-      <div className="container mx-auto px-4">
+    <section id="about" className="py-24 bg-gradient-to-b from-background to-muted/20">
+      <div className="container mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Image Side */}
-          <div className="relative animate-fade-in-up">
-            <div className="glass rounded-3xl p-2 glow">
-              <div className="bg-gradient-soft rounded-2xl p-8 aspect-[4/3] flex items-center justify-center">
-                <div className="text-center space-y-6">
-                  <div className="w-32 h-32 mx-auto rounded-full gradient-primary flex items-center justify-center glow">
-                    <span className="text-6xl font-black text-white">د</span>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-3xl font-black text-gradient">داريوم</h3>
-                    <p className="text-lg text-muted-foreground">نظام تشغيل العقارات الذكي</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Content Side */}
-          <div className="text-right space-y-8 animate-fade-in-up delay-200">
-            <div className="space-y-4">
-              <h2 className="text-4xl lg:text-5xl font-black">
-                عن <span className="text-gradient">داريوم</span>
+          {/* Right - Content */}
+          <div className="text-right space-y-8 animate-fade-in-up">
+            <div>
+              <span className="text-primary font-bold text-sm tracking-wider">عن داريوم</span>
+              <h2 className="text-5xl font-black mt-4 leading-tight">
+                نظام متكامل لإدارة
+                <br />
+                <span className="text-gradient">العقارات المؤجرة</span>
               </h2>
-              <div className="w-24 h-1 gradient-primary mr-auto"></div>
             </div>
-            
-            <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
-              <p>
-                <strong className="text-foreground font-bold">داريوم</strong> منصة سعودية متخصصة في إدارة العقارات والحجوزات، صُممت لتبسيط عمليات الملاك والمديرين عبر واجهة واحدة متكاملة.
-              </p>
-              
-              <p>
-                يمكنك من خلالها ربط عقارك بمنصات الحجز الشهيرة، وتتبع المدفوعات والتقارير، والتواصل بسهولة مع الضيوف. نهدف إلى تقليل الأخطاء اليدوية وتقديم تجربة سلسة ومريحة لكل من المالك والضيف.
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              {[
-                "إدارة موحّدة لجميع عقاراتك من لوحة واحدة",
-                "تكامل تلقائي مع أشهر منصات الحجز العالمية",
-                "تقارير مالية ذكية متوافقة مع ضريبة القيمة المضافة",
-                "ذكاء اصطناعي لتحسين التسعير والإشغال"
-              ].map((feature, index) => (
-                <div key={index} className="flex items-start gap-3 glass p-4 rounded-xl hover:scale-105 transition-transform">
-                  <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-foreground font-medium">{feature}</span>
+
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              داريوم هي منصة سعودية رائدة توفر حلاً شاملاً لأصحاب العقارات المؤجرة. نجمع كل احتياجاتك التشغيلية في مكان واحد: من الحجوزات إلى التنظيف، من المالية إلى تقارير الملاك.
+            </p>
+
+            <p className="text-lg text-muted-foreground">
+              بُنيت بتقنيات حديثة وتصميم عربي أصيل لتوفر تجربة سلسة لمدراء العقارات في المملكة. نحن نفهم تحديات السوق السعودي ونقدم الحلول المناسبة.
+            </p>
+
+            <div className="grid grid-cols-2 gap-6 pt-6">
+              {features.map((feature, index) => (
+                <div 
+                  key={index} 
+                  className="glass rounded-2xl p-6 hover:shadow-lg transition-all group cursor-pointer animate-scale-in"
+                  style={{animationDelay: `${index * 100}ms`}}
+                >
+                  <div className="w-14 h-14 gradient-primary rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <feature.icon className="w-7 h-7 text-white" />
+                  </div>
+                  <h4 className="font-bold text-lg mb-2">{feature.title}</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Left - Logo & Visual */}
+          <div className="relative animate-fade-in delay-300">
+            <div className="relative z-10">
+              <div className="glass rounded-3xl p-16 shadow-2xl glow text-center">
+                <Image 
+                  src="/daryum-logo.png" 
+                  alt="داريوم" 
+                  width={400}
+                  height={150}
+                  className="w-full h-auto animate-float"
+                />
+                <p className="text-xl font-bold text-muted-foreground mt-8">
+                  الشريك الأمثل لإدارة عقاراتك المؤجرة
+                </p>
+              </div>
+            </div>
+
+            {/* Decorative Elements */}
+            <div className="absolute -top-8 -right-8 w-40 h-40 gradient-accent rounded-full opacity-20 animate-float blur-2xl"></div>
+            <div className="absolute -bottom-8 -left-8 w-48 h-48 gradient-primary rounded-full opacity-20 animate-float delay-500 blur-2xl"></div>
           </div>
         </div>
       </div>
