@@ -1,11 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Urbanist:wght@700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-<![CDATA[
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&fami
-...
- background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--primary)) 100%);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Premium Saudi PropTech palette - Teal/Cyan */
+    --primary: 180 100% 25%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 43 74% 66%;
+    --accent-foreground: 222 47% 11%;
+    --background: 45 56% 96%;
+    --foreground: 222 47% 11%;
+    --muted: 45 20% 88%;
+    --muted-foreground: 222 20% 40%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --border: 45 20% 82%;
+    --input: 45 20% 82%;
+    --ring: 180 100% 25%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --available: 180 100% 25%;
+    --occupied: 217 91% 60%;
+    --cleaning: 174 62% 47%;
+    --maintenance: 38 92% 50%;
+    --blocked: 222 20% 40%;
+    
+    --radius: 0.5rem;
   }
 }
-]]>
 
+@layer base {
+  * {
+    @apply border-border;
+    direction: rtl;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    direction: rtl;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Cairo', 'IBM Plex Sans', -apple-system, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    direction: rtl;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cairo', 'Urbanist', -apple-system, sans-serif;
+    font-weight: 800;
+  }
+  
+  h1, h2, h3, h4, h5, h6, p, span, div, a, button {
+    font-variant-ligatures: normal;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  }
+  
+  .font-mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
 
-[Tool result trimmed: kept first 100 chars and last 100 chars of 5373 chars.]
+@layer utilities {
+  @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slide-in-right { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slide-in-left { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes scale-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes gradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; opacity: 0; }
+  .animate-fade-in-down { animation: fade-in-down 0.6s ease-out forwards; opacity: 0; }
+  .animate-fade-in { animation: fade-in 0.8s ease-out forwards; opacity: 0; }
+  .animate-slide-in-right { animation: slide-in-right 0.8s ease-out forwards; opacity: 0; }
+  .animate-slide-in-left { animation: slide-in-left 0.8s ease-out forwards; opacity: 0; }
+  .animate-scale-in { animation: scale-in 0.6s ease-out forwards; opacity: 0; }
+  .animate-gradient { background-size: 200% 200%; animation: gradient 3s ease infinite; }
+  .animate-bounce { animation: bounce 2s ease-in-out infinite; }
+
+  .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+  .glass-dark { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+  .text-gradient { background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gradient-primary { background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%); }
+  .gradient-accent { background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%); }
+  .gradient-secondary { background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--primary)) 100%); }
+}
