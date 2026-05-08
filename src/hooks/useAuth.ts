@@ -1,4 +1,5 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import React from 'react';
 import { AuthService } from '@/services/auth.service';
 import { User } from '@/lib/supabase';
 
@@ -57,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: !!user,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return React.createElement(AuthContext.Provider, { value }, children);
 }
 
 export function useAuth() {
