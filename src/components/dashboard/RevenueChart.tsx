@@ -1,81 +1,36 @@
 "use client";
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { TrendingUp } from "lucide-react";
 
 export function RevenueChart() {
-  const data = [
-    { month: "يناير", revenue: 1842000, target: 1800000 },
-    { month: "فبراير", revenue: 1956000, target: 1850000 },
-    { month: "مارس", revenue: 2104000, target: 1900000 },
-    { month: "أبريل", revenue: 2287000, target: 2000000 },
-    { month: "مايو", revenue: 2451000, target: 2100000 },
-    { month: "يونيو", revenue: 2480000, target: 2200000 },
-  ];
+  const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو"];
+  const revenue = ["﷼ 286K", "﷼ 301K", "﷼ 328K", "﷼ 355K", "﷼ 389K", "﷼ 421K"];
 
   return (
-    <div className="glass rounded-2xl p-6 animate-fade-in-up delay-200">
+    <div className="glass rounded-xl p-6 border border-border/50">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold">اتجاه الإيرادات</h3>
-          <p className="text-sm text-muted-foreground mt-1">المقارنة مع الهدف الشهري</p>
+          <h3 className="text-lg font-bold text-foreground mb-1">الإيرادات الشهرية</h3>
+          <p className="text-sm text-muted-foreground">نمو مستمر خلال 6 أشهر</p>
         </div>
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-[hsl(174,100%,29%)] to-[hsl(174,80%,40%)]"></div>
-            <span>الإيراد الفعلي</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-muted"></div>
-            <span>الهدف</span>
-          </div>
+        <div className="flex items-center gap-2 text-available">
+          <TrendingUp className="w-5 h-5" />
+          <span className="text-sm font-semibold">+47%</span>
         </div>
       </div>
       
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(174, 100%, 29%)" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="hsl(174, 100%, 29%)" stopOpacity={0.05}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-          <XAxis 
-            dataKey="month" 
-            stroke="hsl(var(--muted-foreground))"
-            style={{ fontSize: '12px' }}
-          />
-          <YAxis 
-            stroke="hsl(var(--muted-foreground))"
-            style={{ fontSize: '12px' }}
-            tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
-          />
-          <Tooltip 
-            contentStyle={{
-              backgroundColor: 'hsl(var(--card))',
-              border: '1px solid hsl(var(--border))',
-              borderRadius: '8px',
-              direction: 'rtl'
-            }}
-            formatter={(value: number) => [`${(value / 1000).toFixed(0)}K ر.س`, '']}
-          />
-          <Area 
-            type="monotone" 
-            dataKey="target" 
-            stroke="hsl(var(--muted))" 
-            fill="hsl(var(--muted))" 
-            strokeWidth={2}
-            fillOpacity={0.2}
-          />
-          <Area 
-            type="monotone" 
-            dataKey="revenue" 
-            stroke="hsl(174, 100%, 29%)" 
-            fill="url(#revenueGradient)" 
-            strokeWidth={3}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      <div className="h-64 flex items-end justify-between gap-2">
+        {revenue.map((value, index) => (
+          <div key={index} className="flex-1 flex flex-col items-center gap-2">
+            <div className="w-full bg-gradient-to-t from-primary to-secondary rounded-t-lg transition-all hover:opacity-80"
+                 style={{ height: `${((index + 1) / revenue.length) * 100}%` }}>
+            </div>
+            <div className="text-xs font-semibold text-foreground">{value}</div>
+            <div className="text-xs text-muted-foreground">{months[index]}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

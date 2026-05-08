@@ -2,17 +2,14 @@ import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import {
-  Globe,
-  Plus,
   RefreshCw,
   CheckCircle2,
   AlertCircle,
+  Clock,
   TrendingUp,
   DollarSign,
-  Calendar,
-  Settings
+  Calendar
 } from "lucide-react";
 
 export default function ChannelsPage() {
@@ -20,88 +17,101 @@ export default function ChannelsPage() {
     {
       id: 1,
       name: "Airbnb",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_Bélo.svg",
-      connected: true,
-      status: "active",
+      logo: "🏠",
+      status: "connected",
       lastSync: "منذ 5 دقائق",
-      properties: 12,
-      bookings: 48,
-      revenue: "156,800"
+      bookings: 45,
+      revenue: "﷼ 128,450",
+      occupancy: 82,
+      syncStatus: "success",
+      color: "from-red-500 to-pink-500"
     },
     {
       id: 2,
       name: "Booking.com",
-      logo: "https://cf.bstatic.com/static/img/b25logo/booking_logo_retina/22615963add19ac6b6abe4b7f4283ef15fa5a0ca.png",
-      connected: true,
-      status: "active",
-      lastSync: "منذ 10 دقائق",
-      properties: 10,
-      bookings: 42,
-      revenue: "134,200"
+      logo: "🅱️",
+      status: "connected",
+      lastSync: "منذ 12 دقيقة",
+      bookings: 38,
+      revenue: "﷼ 96,200",
+      occupancy: 76,
+      syncStatus: "success",
+      color: "from-blue-500 to-cyan-500"
     },
     {
       id: 3,
-      name: "Expedia",
-      logo: "https://www.expedia.com/_dms/header/logo.svg",
-      connected: true,
-      status: "warning",
-      lastSync: "منذ ساعتين",
-      properties: 8,
-      bookings: 31,
-      revenue: "98,500"
+      name: "حجز مباشر",
+      logo: "📱",
+      status: "connected",
+      lastSync: "منذ ساعة",
+      bookings: 22,
+      revenue: "﷼ 58,300",
+      occupancy: 68,
+      syncStatus: "success",
+      color: "from-emerald-500 to-green-500"
     },
     {
       id: 4,
       name: "Agoda",
-      logo: "https://cdn6.agoda.net/images/kite-js/logo/agoda/color-default.svg",
-      connected: false,
-      status: "inactive",
-      lastSync: "-",
-      properties: 0,
-      bookings: 0,
-      revenue: "0"
+      logo: "🅰️",
+      status: "connected",
+      lastSync: "منذ 3 ساعات",
+      bookings: 15,
+      revenue: "﷼ 42,100",
+      occupancy: 64,
+      syncStatus: "warning",
+      color: "from-purple-500 to-pink-500"
     },
     {
       id: 5,
-      name: "المطار",
-      logo: "https://www.almatar.com/static/images/almatar-logo-en.svg",
-      connected: true,
-      status: "active",
-      lastSync: "منذ 15 دقيقة",
-      properties: 6,
-      bookings: 18,
-      revenue: "67,300"
+      name: "Vrbo",
+      logo: "🏡",
+      status: "error",
+      lastSync: "منذ يومين",
+      bookings: 0,
+      revenue: "﷼ 0",
+      occupancy: 0,
+      syncStatus: "error",
+      color: "from-orange-500 to-red-500"
     },
     {
       id: 6,
-      name: "المسافر",
-      logo: "https://www.almosafer.com/en/logo.svg",
-      connected: false,
-      status: "inactive",
-      lastSync: "-",
-      properties: 0,
+      name: "Expedia",
+      logo: "✈️",
+      status: "disconnected",
+      lastSync: "غير متصل",
       bookings: 0,
-      revenue: "0"
+      revenue: "﷼ 0",
+      occupancy: 0,
+      syncStatus: "disconnected",
+      color: "from-gray-400 to-gray-500"
     },
   ];
 
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case "active": return <Badge className="bg-available">نشط</Badge>;
-      case "warning": return <Badge className="bg-maintenance">تحذير</Badge>;
-      case "inactive": return <Badge variant="secondary">غير متصل</Badge>;
+      case "connected": return <Badge className="bg-available">متصل</Badge>;
+      case "error": return <Badge variant="destructive">خطأ</Badge>;
+      case "disconnected": return <Badge variant="outline">غير متصل</Badge>;
       default: return <Badge variant="outline">غير معروف</Badge>;
     }
   };
 
-  const handleSync = (channelId: number) => {
-    console.log("Syncing channel:", channelId);
-    alert("جارٍ المزامنة...");
+  const getSyncStatusIcon = (syncStatus: string) => {
+    switch(syncStatus) {
+      case "success": return <CheckCircle2 className="w-5 h-5 text-available" />;
+      case "warning": return <Clock className="w-5 h-5 text-amber-500" />;
+      case "error": return <AlertCircle className="w-5 h-5 text-destructive" />;
+      default: return <AlertCircle className="w-5 h-5 text-muted-foreground" />;
+    }
   };
 
-  const handleToggle = (channelId: number) => {
-    console.log("Toggling channel:", channelId);
-  };
+  const stats = [
+    { label: "إجمالي القنوات", value: "6", color: "from-primary to-secondary" },
+    { label: "المتصلة", value: "4", color: "from-available to-emerald-500" },
+    { label: "إجمالي الحجوزات", value: "120", color: "from-blue-500 to-cyan-500" },
+    { label: "إجمالي الإيراد", value: "﷼ 325K", color: "from-amber-500 to-orange-500" },
+  ];
 
   return (
     <>
@@ -111,26 +121,21 @@ export default function ChannelsPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-black text-foreground">قنوات الحجز</h1>
-              <p className="text-muted-foreground">إدارة وربط منصات الحجز الإلكترونية</p>
+              <h1 className="text-3xl font-black text-foreground">القنوات</h1>
+              <p className="text-muted-foreground">إدارة منصات الحجز والتكاملات</p>
             </div>
             <Button className="gradient-primary">
-              <Plus className="w-5 h-5 ml-2" />
-              ربط قناة جديدة
+              <RefreshCw className="w-5 h-5 ml-2" />
+              مزامنة الكل
             </Button>
           </div>
 
           {/* KPIs */}
           <div className="grid md:grid-cols-4 gap-4">
-            {[
-              { label: "قنوات متصلة", value: "4", icon: Globe, color: "from-primary to-secondary" },
-              { label: "إجمالي الحجوزات", value: "139", icon: Calendar, color: "from-blue-500 to-cyan-500" },
-              { label: "إجمالي الإيراد", value: "﷼456,800", icon: DollarSign, color: "from-emerald-500 to-green-500" },
-              { label: "معدل التحويل", value: "12.4%", icon: TrendingUp, color: "from-amber-500 to-orange-500" },
-            ].map((stat, index) => (
+            {stats.map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6">
                 <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} p-3 mb-3`}>
-                  <stat.icon className="w-full h-full text-white" />
+                  <TrendingUp className="w-full h-full text-white" />
                 </div>
                 <div className="text-2xl font-bold text-foreground mb-1">{stat.value}</div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -139,86 +144,104 @@ export default function ChannelsPage() {
           </div>
 
           {/* Channels Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {channels.map((channel) => (
               <div
                 key={channel.id}
-                className="glass rounded-2xl p-6 border border-border/50 hover:shadow-xl transition-all duration-300"
+                className="glass rounded-xl p-6 border border-border/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
-                {/* Channel Header */}
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-xl bg-white p-2 flex items-center justify-center border border-border/50">
-                      <img 
-                        src={channel.logo} 
-                        alt={channel.name}
-                        className="max-w-full max-h-full object-contain"
-                      />
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${channel.color} flex items-center justify-center text-2xl`}>
+                      {channel.logo}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-foreground mb-1">{channel.name}</h3>
-                      {getStatusBadge(channel.status)}
+                      <h3 className="text-lg font-bold text-foreground">{channel.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        {getSyncStatusIcon(channel.syncStatus)}
+                        <span>{channel.lastSync}</span>
+                      </div>
                     </div>
                   </div>
-                  <Switch 
-                    checked={channel.connected}
-                    onCheckedChange={() => handleToggle(channel.id)}
-                  />
+                  {getStatusBadge(channel.status)}
                 </div>
 
-                {/* Channel Stats */}
-                {channel.connected && (
-                  <div className="grid grid-cols-3 gap-4 mb-6 pb-6 border-b border-border/50">
+                {/* Stats */}
+                {channel.status !== "disconnected" && (
+                  <div className="grid grid-cols-3 gap-4 mb-4 pt-4 border-t border-border/50">
                     <div>
-                      <div className="text-xs text-muted-foreground mb-1">عقارات</div>
-                      <div className="text-lg font-bold text-foreground">{channel.properties}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">حجوزات</div>
+                      <div className="text-xs text-muted-foreground mb-1">الحجوزات</div>
                       <div className="text-lg font-bold text-foreground">{channel.bookings}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground mb-1">إيراد</div>
-                      <div className="text-sm font-bold text-foreground">﷼{channel.revenue}</div>
+                      <div className="text-xs text-muted-foreground mb-1">الإيراد</div>
+                      <div className="text-sm font-bold text-foreground">{channel.revenue}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">الإشغال</div>
+                      <div className="text-lg font-bold text-primary">{channel.occupancy}%</div>
                     </div>
                   </div>
                 )}
 
-                {/* Last Sync */}
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    {channel.status === "active" ? (
-                      <CheckCircle2 className="w-4 h-4 text-available" />
-                    ) : channel.status === "warning" ? (
-                      <AlertCircle className="w-4 h-4 text-maintenance" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4 text-muted-foreground" />
-                    )}
-                    <span>آخر مزامنة: {channel.lastSync}</span>
-                  </div>
-                  {channel.connected && (
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleSync(channel.id)}
-                      >
+                {/* Actions */}
+                <div className="flex gap-2 pt-4 border-t border-border/50">
+                  {channel.status === "connected" && (
+                    <>
+                      <Button size="sm" variant="outline" className="flex-1">
                         <RefreshCw className="w-4 h-4 ml-2" />
                         مزامنة
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <Settings className="w-4 h-4" />
+                      <Button size="sm" variant="outline" className="flex-1">
+                        الإعدادات
                       </Button>
-                    </div>
+                    </>
                   )}
-                  {!channel.connected && (
-                    <Button size="sm" className="gradient-primary">
+                  {channel.status === "error" && (
+                    <Button size="sm" variant="destructive" className="flex-1">
+                      <AlertCircle className="w-4 h-4 ml-2" />
+                      إصلاح الخطأ
+                    </Button>
+                  )}
+                  {channel.status === "disconnected" && (
+                    <Button size="sm" className="flex-1 gradient-primary">
+                      <CheckCircle2 className="w-4 h-4 ml-2" />
                       ربط الآن
                     </Button>
                   )}
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Performance Chart Section */}
+          <div className="glass rounded-xl p-6">
+            <h2 className="text-xl font-bold text-foreground mb-6">أداء القنوات - آخر 30 يوماً</h2>
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+              {channels.filter(c => c.status === "connected").map((channel) => (
+                <div key={channel.id} className="p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">{channel.logo}</span>
+                    <span className="font-semibold text-foreground">{channel.name}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">الحجوزات:</span>
+                      <span className="font-bold text-foreground">{channel.bookings}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">الإيراد:</span>
+                      <span className="font-bold text-primary">{channel.revenue}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">الإشغال:</span>
+                      <span className="font-bold text-available">{channel.occupancy}%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </AppShell>
