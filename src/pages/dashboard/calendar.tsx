@@ -1,100 +1,178 @@
+import { useState } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Filter } from "lucide-react";
-import { useRole } from "@/contexts/RoleContext";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+  Calendar as CalendarIcon
+} from "lucide-react";
 
 export default function CalendarPage() {
-  const { hasPermission } = useRole();
+  const [selectedProperty, setSelectedProperty] = useState("all");
+  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 4)); // May 2026
 
-  // Basic mock for calendar
-  const days = Array.from({ length: 30 }, (_, i) => i + 1);
-  const units = ["جناح 101", "جناح 102", "فيلا A1", "شقة B2"];
+  const properties = [
+    { id: "all", name: "جميع العقارات" },
+    { id: "1", name: "برج الفيصلية" },
+    { id: "2", name: "أجنحة النخيل" },
+    { id: "3", name: "فلل الواحة" },
+  ];
 
-  if (!hasPermission("canViewCalendar")) {
-    return (
-      <AppShell>
-        <div className="flex items-center justify-center h-[60vh]">
-          <p className="text-muted-foreground text-lg">عذراً، ليس لديك صلاحية للوصول إلى التقويم.</p>
-        </div>
-      </AppShell>
-    );
-  }
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    
+    return { daysInMonth, startingDayOfWeek };
+  };
+
+  const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
+  
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const emptyDays = Array.from({ length: startingDayOfWeek }, (_, i) => i);
+
+  const monthNames = [
+    "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+    "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+  ];
+
+  const weekDays = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+  const previousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  // Mock reservations data
+  const reservations: { [key: number]: { status: string; guest: string } } = {
+    15: { status: "occupied", guest: "أحمد السعيد" },
+    16: { status: "occupied", guest: "أحمد السعيد" },
+    17: { status: "occupied", guest: "أحمد السعيد" },
+    20: { status: "cleaning", guest: "" },
+    21: { status: "available", guest: "" },
+    22: { status: "available", guest: "" },
+  };
+
+  const getDayStatus = (day: number) => {
+    return reservations[day]?.status || "available";
+  };
+
+  const getDayClass = (day: number) => {
+    const status = getDayStatus(day);
+    switch(status) {
+      case "occupied": return "bg-occupied text-white";
+      case "cleaning": return "bg-cleaning text-white";
+      case "maintenance": return "bg-maintenance text-white";
+      case "available": return "bg-available/10 text-available hover:bg-available/20";
+      default: return "hover:bg-muted/50";
+    }
+  };
 
   return (
     <>
-      <SEO title="التقويم الموحد - داريوم" />
+      <SEO title="التقويم - داريوم" />
       <AppShell>
         <div className="space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Header */}
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">التقويم الموحد</h1>
-              <p className="text-muted-foreground">عرض وإدارة الحجوزات عبر جميع الوحدات</p>
+              <h1 className="text-3xl font-black text-foreground">التقويم</h1>
+              <p className="text-muted-foreground">عرض الحجوزات والتواريخ</p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="gap-2">
-                <Filter className="w-4 h-4" />
-                تصفية
-              </Button>
-              <div className="flex items-center glass rounded-lg p-1">
-                <Button variant="ghost" size="icon"><ChevronRight className="w-4 h-4" /></Button>
-                <span className="px-4 font-semibold text-sm">مايو 2026</span>
-                <Button variant="ghost" size="icon"><ChevronLeft className="w-4 h-4" /></Button>
-              </div>
+            <div className="flex items-center gap-4">
+              <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                <SelectTrigger className="w-64">
+                  <Building2 className="w-4 h-4 ml-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {properties.map((property) => (
+                    <SelectItem key={property.id} value={property.id}>
+                      {property.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Timeline Mock */}
-          <div className="glass rounded-xl border border-border/50 overflow-hidden">
-            <div className="overflow-x-auto">
-              <div className="min-w-[800px]">
-                {/* Header Row */}
-                <div className="flex border-b border-border/50 bg-muted/30">
-                  <div className="w-48 p-4 font-bold border-l border-border/50 flex items-center shrink-0">
-                    الوحدة
-                  </div>
-                  <div className="flex flex-1">
-                    {days.slice(0, 15).map(day => (
-                      <div key={day} className="flex-1 min-w-[60px] p-2 text-center border-l border-border/50 text-sm">
-                        <div className="text-muted-foreground text-xs mb-1">ماي</div>
-                        <div className="font-semibold">{day}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          {/* Calendar */}
+          <div className="glass rounded-xl p-6">
+            {/* Month Navigation */}
+            <div className="flex items-center justify-between mb-6">
+              <Button variant="outline" size="sm" onClick={previousMonth}>
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+              <h2 className="text-2xl font-bold text-foreground">
+                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              </h2>
+              <Button variant="outline" size="sm" onClick={nextMonth}>
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+            </div>
 
-                {/* Rows */}
-                {units.map((unit, i) => (
-                  <div key={i} className="flex border-b border-border/50 last:border-0 hover:bg-muted/10 transition-colors">
-                    <div className="w-48 p-4 font-semibold text-sm border-l border-border/50 flex items-center shrink-0">
-                      {unit}
-                    </div>
-                    <div className="flex flex-1 relative min-h-[60px]">
-                      {/* Grid lines */}
-                      {days.slice(0, 15).map(day => (
-                        <div key={day} className="flex-1 min-w-[60px] border-l border-border/50"></div>
-                      ))}
-                      
-                      {/* Mock Reservations */}
-                      {i === 0 && (
-                        <div className="absolute top-2 bottom-2 right-[120px] w-[180px] bg-occupied text-white text-xs p-1.5 rounded-md shadow-sm z-10 flex flex-col justify-center overflow-hidden">
-                          <span className="font-bold truncate">أحمد محمد (Airbnb)</span>
-                        </div>
-                      )}
-                      {i === 1 && (
-                        <div className="absolute top-2 bottom-2 right-[240px] w-[120px] bg-primary text-white text-xs p-1.5 rounded-md shadow-sm z-10 flex flex-col justify-center overflow-hidden">
-                          <span className="font-bold truncate">سارة فهد (Booking)</span>
-                        </div>
-                      )}
-                      {i === 2 && (
-                        <div className="absolute top-2 bottom-2 right-[60px] w-[240px] bg-maintenance text-maintenance-foreground text-xs p-1.5 rounded-md shadow-sm z-10 flex flex-col justify-center overflow-hidden border border-maintenance/20">
-                          <span className="font-bold truncate">صيانة دورية</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+            {/* Legend */}
+            <div className="flex flex-wrap gap-4 mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-available"></div>
+                <span className="text-sm text-muted-foreground">متاح</span>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-occupied"></div>
+                <span className="text-sm text-muted-foreground">مشغول</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-cleaning"></div>
+                <span className="text-sm text-muted-foreground">تنظيف</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-maintenance"></div>
+                <span className="text-sm text-muted-foreground">صيانة</span>
+              </div>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-2">
+              {/* Week day headers */}
+              {weekDays.map((day) => (
+                <div key={day} className="text-center p-2 font-bold text-sm text-muted-foreground">
+                  {day}
+                </div>
+              ))}
+
+              {/* Empty days */}
+              {emptyDays.map((_, index) => (
+                <div key={`empty-${index}`} className="aspect-square"></div>
+              ))}
+
+              {/* Days */}
+              {days.map((day) => (
+                <div
+                  key={day}
+                  className={`aspect-square rounded-lg p-2 transition-all cursor-pointer border border-border/50 ${getDayClass(day)}`}
+                >
+                  <div className="font-semibold text-sm">{day}</div>
+                  {reservations[day] && (
+                    <div className="text-xs mt-1 truncate">{reservations[day].guest}</div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
