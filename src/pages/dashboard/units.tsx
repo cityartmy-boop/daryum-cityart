@@ -1,33 +1,35 @@
 import { useState } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
+import { UnitDialog } from "@/components/dashboard/UnitDialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
-  Home, 
-  Search, 
-  Plus, 
-  MapPin,
-  BedDouble,
-  Users,
+  Home,
+  Plus,
   Eye,
-  Edit,
-  MoreVertical,
-  DoorOpen
+  Pencil,
+  Trash2,
+  Filter
 } from "lucide-react";
-import { useRole } from "@/contexts/RoleContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function UnitsPage() {
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const { hasPermission } = useRole();
+  const [filter, setFilter] = useState("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<any>(null);
 
   // Mock units data
   const units = [
@@ -77,9 +79,9 @@ export default function UnitsPage() {
     },
   ];
 
-  const filteredUnits = filterStatus === "all" 
+  const filteredUnits = filter === "all" 
     ? units 
-    : units.filter(u => u.status === filterStatus);
+    : units.filter(u => u.status === filter);
 
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -91,25 +93,45 @@ export default function UnitsPage() {
     }
   };
 
+  const handleDelete = (unit: any) => {
+    setSelectedUnit(unit);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    console.log("Deleting unit:", selectedUnit);
+    setDeleteDialogOpen(false);
+    setSelectedUnit(null);
+  };
+
+  const handleView = (unit: any) => {
+    setSelectedUnit(unit);
+    setViewDialogOpen(true);
+  };
+
+  const handleEdit = (unit: any) => {
+    setSelectedUnit(unit);
+    setEditDialogOpen(true);
+  };
+
   return (
     <>
       <SEO title="الوحدات - داريوم" />
       <AppShell>
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">الوحدات</h1>
-              <p className="text-muted-foreground">
-                إدارة ومتابعة جميع الوحدات السكنية وحالاتها
-              </p>
+              <h1 className="text-3xl font-black text-foreground">الوحدات</h1>
+              <p className="text-muted-foreground">إدارة جميع الوحدات والشقق</p>
             </div>
-            {hasPermission("canManageUnits") && (
-              <Button className="gradient-primary gap-2">
-                <Plus className="w-4 h-4" />
-                إضافة وحدة جديدة
-              </Button>
-            )}
+            <Button 
+              className="gradient-primary"
+              onClick={() => setDialogOpen(true)}
+            >
+              <Plus className="w-5 h-5 ml-2" />
+              إضافة وحدة جديدة
+            </Button>
           </div>
 
           {/* Filters */}
@@ -122,7 +144,7 @@ export default function UnitsPage() {
                   className="pr-10"
                 />
               </div>
-              <Select defaultValue="all" onValueChange={setFilterStatus}>
+              <Select defaultValue="all" onValueChange={setFilter}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue />
                 </SelectTrigger>
@@ -194,7 +216,60 @@ export default function UnitsPage() {
               </div>
             ))}
           </div>
+
+          {/* Add action buttons to each unit card */}
+          <div className="p-4 border-t border-border/50 flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => handleView(unit)}
+            >
+              <Eye className="w-4 h-4 ml-2" />
+              عرض
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => handleEdit(unit)}
+            >
+              <Pencil className="w-4 h-4 ml-2" />
+              تعديل
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => handleDelete(unit)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+
+        {/* Dialogs */}
+        <UnitDialog open={dialogOpen} onOpenChange={setDialogOpen} mode="add" />
+        <UnitDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} mode="view" unit={selectedUnit} />
+        <UnitDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} mode="edit" unit={selectedUnit} />
+
+        {/* Delete Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                سيتم حذف الوحدة "{selectedUnit?.name}" نهائياً.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} className="bg-destructive">
+                حذف
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </AppShell>
     </>
   );

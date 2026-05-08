@@ -1,45 +1,51 @@
 import { useState } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
+import { PropertyDialog } from "@/components/dashboard/PropertyDialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
-  Building2, 
-  Search, 
-  Plus, 
-  MapPin,
-  Home,
-  TrendingUp,
+  Building2,
+  Plus,
   Eye,
-  Edit,
-  MoreVertical
+  Pencil,
+  Trash2,
+  DollarSign,
+  Users,
+  Percent,
+  Filter
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function PropertiesPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filter, setFilter] = useState("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
 
-  // Mock properties data
   const properties = [
     {
       id: 1,
-      name: "برج الفيصلية للأجنحة الفندقية",
-      location: "الرياض، حي العليا",
-      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
+      name: "برج الفيصلية - الرياض",
+      location: "الرياض، حي الملقا",
       units: 24,
       occupied: 18,
-      revenue: "SAR 284,500",
+      available: 6,
+      revenue: "456,000",
       occupancy: 75,
       status: "active",
-      type: "فندقية"
+      image: "/property-1.jpg"
     },
     {
       id: 2,
@@ -103,30 +109,48 @@ export default function PropertiesPage() {
     },
   ];
 
-  const filteredProperties = filterStatus === "all" 
-    ? properties 
-    : properties.filter(p => p.status === filterStatus);
+  const handleDelete = (property: any) => {
+    setSelectedProperty(property);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    console.log("Deleting property:", selectedProperty);
+    setDeleteDialogOpen(false);
+    setSelectedProperty(null);
+  };
+
+  const handleView = (property: any) => {
+    setSelectedProperty(property);
+    setViewDialogOpen(true);
+  };
+
+  const handleEdit = (property: any) => {
+    setSelectedProperty(property);
+    setEditDialogOpen(true);
+  };
 
   return (
     <>
       <SEO title="العقارات - داريوم" />
       <AppShell>
         <div className="space-y-6">
-          {/* Header */}
+          {/* Header with Add Button */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">العقارات</h1>
-              <p className="text-muted-foreground">
-                إدارة جميع العقارات المسجّلة في المنصّة
-              </p>
+              <h1 className="text-3xl font-black text-foreground">العقارات</h1>
+              <p className="text-muted-foreground">إدارة جميع العقارات والمجمعات</p>
             </div>
-            <Button className="gradient-primary gap-2">
-              <Plus className="w-4 h-4" />
+            <Button 
+              className="gradient-primary"
+              onClick={() => setDialogOpen(true)}
+            >
+              <Plus className="w-5 h-5 ml-2" />
               إضافة عقار جديد
             </Button>
           </div>
 
-          {/* Stats */}
+          {/* KPIs */}
           <div className="grid md:grid-cols-4 gap-4">
             {[
               { label: "إجمالي العقارات", value: "6", icon: Building2, color: "from-primary to-secondary" },
@@ -154,7 +178,7 @@ export default function PropertiesPage() {
                   className="pr-10"
                 />
               </div>
-              <Select defaultValue="all" onValueChange={setFilterStatus}>
+              <Select defaultValue="all" onValueChange={setFilter}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue />
                 </SelectTrigger>
@@ -182,10 +206,10 @@ export default function PropertiesPage() {
 
           {/* Properties Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProperties.map((property) => (
+            {properties.map((property) => (
               <div
                 key={property.id}
-                className="glass rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-2"
+                className="glass rounded-2xl overflow-hidden border border-border/50 hover:shadow-2xl transition-all duration-300 group"
               >
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
@@ -237,17 +261,32 @@ export default function PropertiesPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                  <div className="p-6 border-t border-border/50 flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleView(property)}
+                    >
                       <Eye className="w-4 h-4 ml-2" />
                       عرض
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Edit className="w-4 h-4 ml-2" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleEdit(property)}
+                    >
+                      <Pencil className="w-4 h-4 ml-2" />
                       تعديل
                     </Button>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="w-4 h-4" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDelete(property)}
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -255,6 +294,50 @@ export default function PropertiesPage() {
             ))}
           </div>
         </div>
+
+        {/* Add Property Dialog */}
+        <PropertyDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          mode="add"
+        />
+
+        {/* View Property Dialog */}
+        <PropertyDialog
+          open={viewDialogOpen}
+          onOpenChange={setViewDialogOpen}
+          mode="view"
+          property={selectedProperty}
+        />
+
+        {/* Edit Property Dialog */}
+        <PropertyDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          mode="edit"
+          property={selectedProperty}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                سيتم حذف العقار "{selectedProperty?.name}" نهائياً. هذا الإجراء لا يمكن التراجع عنه.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDelete}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                حذف
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </AppShell>
     </>
   );
