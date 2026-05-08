@@ -1,4 +1,5 @@
 import { SEO } from "@/components/SEO";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
@@ -10,7 +11,7 @@ import { AIInsights } from "@/components/dashboard/AIInsights";
 
 export default function DashboardPage() {
   return (
-    <>
+    <ProtectedRoute>
       <SEO title="لوحة التحكم - داريوم" />
       <AppShell>
         <div className="space-y-6">
@@ -42,6 +43,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </AppShell>
-    </>
+    </ProtectedRoute>
   );
 }
