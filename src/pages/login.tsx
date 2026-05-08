@@ -6,7 +6,7 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function Login() {
@@ -15,7 +15,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,25 +22,57 @@ export default function Login() {
     setError("");
     setIsLoading(true);
 
-    console.log("🔐 Attempting login with:", email);
+    console.log("🔐 Starting login process...");
+    console.log("Email:", email);
 
     try {
-      await signIn(email, password);
-      console.log("✅ Login successful!");
+      // Test Supabase connection first
+      console.log("🔍 Testing Supabase connection...");
+      const { data: testData, error: testError } = await supabase.auth.getSession();
+      
+      if (testError) {
+        console.error("❌ Supabase connection test failed:", testError);
+        throw new Error("فشل الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت.");
+      }
+      
+      console.log("✅ Supabase connection successful");
+
+      // Now try to sign in
+      console.log("🔐 Attempting to sign in...");
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        console.error("❌ Sign in error:", signInError);
+        throw signInError;
+      }
+
+      console.log("✅ Login successful!", data);
+      router.push("/dashboard");
+
     } catch (err: any) {
       console.error("❌ Login error:", err);
+      console.error("Error details:", {
+        message: err.message,
+        status: err.status,
+        code: err.code,
+      });
       
       // Better error messages in Arabic
       let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
       
-      if (err.message?.includes("Invalid login credentials")) {
+      if (err.message?.includes("Failed to fetch") || err.message?.includes("fetch")) {
+        errorMessage = "❌ فشل الاتصال بالخادم. يرجى التحقق من:\n• اتصال الإنترنت\n• إعدادات Supabase\n• جدار الحماية";
+      } else if (err.message?.includes("Invalid login credentials")) {
         errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
       } else if (err.message?.includes("Email not confirmed")) {
         errorMessage = "يرجى تأكيد بريدك الإلكتروني أولاً";
       } else if (err.message?.includes("User not found")) {
         errorMessage = "لا يوجد حساب بهذا البريد الإلكتروني";
       } else if (err.message) {
-        errorMessage = err.message;
+        errorMessage = `${err.message}\n\nإذا استمرت المشكلة، تحقق من Console (F12)`;
       }
       
       setError(errorMessage);
@@ -72,7 +103,7 @@ export default function Login() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm whitespace-pre-line">
                 {error}
               </div>
             )}
@@ -151,6 +182,16 @@ export default function Login() {
               <p className="font-semibold mb-2 text-center text-primary">💡 تلميح</p>
               <p className="text-muted-foreground text-center">
                 يجب إنشاء حساب جديد أولاً عبر صفحة التسجيل
+              </p>
+            </div>
+
+            {/* Debug Info */}
+            <div className="mt-6 p-4 bg-muted/50 rounded-xl text-xs space-y-2">
+              <p className="font-semibold">🔍 معلومات التشخيص:</p>
+              <p className="font-mono text-muted-foreground">
+                • افتح Console (اضغط F12)<br/>
+                • ابحث عن رسائل "🔐" و "✅" و "❌"<br/>
+                • شارك الأخطاء إذا ظهرت
               </p>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { User, Mail, Lock, Phone, Building2, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function Register() {
@@ -21,7 +21,6 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -44,26 +43,70 @@ export default function Register() {
     }
 
     setIsLoading(true);
-    console.log("📝 Attempting signup with:", formData.email);
+    console.log("📝 Starting registration process...");
+    console.log("Email:", formData.email);
+    console.log("Name:", formData.name);
 
     try {
-      await signUp(formData.email, formData.password, formData.name);
-      console.log("✅ Signup successful!");
+      // Test Supabase connection first
+      console.log("🔍 Testing Supabase connection...");
+      const { data: testData, error: testError } = await supabase.auth.getSession();
+      
+      if (testError) {
+        console.error("❌ Supabase connection test failed:", testError);
+        throw new Error("فشل الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت.");
+      }
+      
+      console.log("✅ Supabase connection successful");
+
+      // Now try to sign up
+      console.log("📝 Attempting to create account...");
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            phone: formData.phone,
+            company: formData.company,
+          },
+        },
+      });
+
+      if (signUpError) {
+        console.error("❌ Signup error:", signUpError);
+        throw signUpError;
+      }
+
+      console.log("✅ Account created successfully!", data);
       setSuccess(true);
+      
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 2000);
+
     } catch (err: any) {
-      console.error("❌ Signup error:", err);
+      console.error("❌ Registration error:", err);
+      console.error("Error details:", {
+        message: err.message,
+        status: err.status,
+        code: err.code,
+      });
       
       // Better error messages in Arabic
       let errorMessage = "حدث خطأ أثناء إنشاء الحساب";
       
-      if (err.message?.includes("already registered")) {
+      if (err.message?.includes("Failed to fetch") || err.message?.includes("fetch")) {
+        errorMessage = "❌ فشل الاتصال بالخادم. يرجى التحقق من:\n• اتصال الإنترنت\n• إعدادات Supabase\n• جدار الحماية";
+      } else if (err.message?.includes("already registered")) {
         errorMessage = "هذا البريد الإلكتروني مسجل مسبقاً";
       } else if (err.message?.includes("Password should be at least")) {
         errorMessage = "كلمة المرور ضعيفة جداً";
       } else if (err.message?.includes("invalid email")) {
         errorMessage = "البريد الإلكتروني غير صحيح";
       } else if (err.message) {
-        errorMessage = err.message;
+        errorMessage = `${err.message}\n\nإذا استمرت المشكلة، تحقق من Console (F12)`;
       }
       
       setError(errorMessage);
@@ -119,7 +162,7 @@ export default function Register() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm whitespace-pre-line">
                 {error}
               </div>
             )}
@@ -157,39 +200,6 @@ export default function Register() {
                     className="pr-11 text-right"
                     required
                     dir="ltr"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-right block">رقم الجوال (اختياري)</Label>
-                <div className="relative">
-                  <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    placeholder="+966 50 123 4567"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="pr-11 text-right"
-                    dir="ltr"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="company" className="text-right block">اسم الشركة (اختياري)</Label>
-                <div className="relative">
-                  <Building2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="company"
-                    name="company"
-                    type="text"
-                    placeholder="شركة العقارات المتحدة"
-                    value={formData.company}
-                    onChange={handleChange}
-                    className="pr-11 text-right"
                   />
                 </div>
               </div>
@@ -261,6 +271,16 @@ export default function Register() {
               <Link href="/login" className="text-primary font-semibold hover:underline">
                 تسجيل الدخول
               </Link>
+            </div>
+
+            {/* Debug Info */}
+            <div className="mt-6 p-4 bg-muted/50 rounded-xl text-xs space-y-2">
+              <p className="font-semibold">🔍 معلومات التشخيص:</p>
+              <p className="font-mono text-muted-foreground">
+                • افتح Console (اضغط F12)<br/>
+                • ابحث عن رسائل "📝" و "✅" و "❌"<br/>
+                • شارك الأخطاء إذا ظهرت
+              </p>
             </div>
           </div>
         </div>
