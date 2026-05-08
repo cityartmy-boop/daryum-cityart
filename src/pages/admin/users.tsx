@@ -119,6 +119,40 @@ export default function AdminUsersPage() {
     { label: "متوسط النشاط اليومي", value: "142", color: "from-amber-500 to-orange-500" },
   ];
 
+  const filteredUsers = users.filter(user => {
+    if (filter === "all") return true;
+    if (filter === "active") return user.status === "active";
+    if (filter === "inactive") return user.status === "inactive";
+    return user.role.toLowerCase().includes(filter);
+  });
+
+  const getRoleBadgeColor = (role: string) => {
+    const colors: { [key: string]: string } = {
+      "Admin": "bg-primary",
+      "Property Manager": "bg-blue-500",
+      "Owner": "bg-emerald-500",
+      "Accountant": "bg-amber-500",
+      "Housekeeping Supervisor": "bg-teal-500",
+      "Cleaner": "bg-purple-500",
+      "Maintenance": "bg-orange-500",
+    };
+    return colors[role] || "bg-gray-500";
+  };
+
+  const handleView = (user: any) => {
+    setSelectedUser(user);
+  };
+
+  const handleEdit = (user: any) => {
+    setSelectedUser(user);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (user: any) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
   const getRoleBadge = (role: string) => {
     const colors: { [key: string]: string } = {
       "Admin": "bg-primary",
