@@ -1,6 +1,5 @@
 import { SEO } from "@/components/SEO";
-import { AppShell } from "@/components/dashboard/AppShell";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { PlatformKPIs } from "@/components/admin/PlatformKPIs";
 import { SubscriptionsTable } from "@/components/admin/SubscriptionsTable";
 import { RecentPayments } from "@/components/admin/RecentPayments";
@@ -9,42 +8,40 @@ import { RevenueGrowth } from "@/components/admin/RevenueGrowth";
 import { UserGrowth } from "@/components/admin/UserGrowth";
 import { ConversionMetrics } from "@/components/admin/ConversionMetrics";
 
-export default function AdminDashboard() {
+export default function AdminDashboardPage() {
   return (
-    <ProtectedRoute requireAdmin>
-      <SEO title="لوحة إدارة المنصة - داريوم" description="إدارة الاشتراكات والمدفوعات" />
-      
-      <AppShell>
-        <div className="flex items-center justify-between mb-8">
+    <>
+      <SEO title="لوحة تحكم الأدمن - داريوم" />
+      <AdminLayout>
+        <div className="space-y-6">
+          {/* Page Header */}
           <div>
-            <h1 className="text-4xl font-bold mb-2">لوحة إدارة المنصة</h1>
-            <p className="text-muted-foreground">إدارة الاشتراكات والمدفوعات ونمو المنصة</p>
+            <h1 className="text-3xl font-black text-foreground mb-2">لوحة تحكم الأدمن</h1>
+            <p className="text-muted-foreground">نظرة شاملة على النظام والمستخدمين</p>
           </div>
-        </div>
 
-        {/* Platform KPIs */}
-        <PlatformKPIs />
+          {/* Platform KPIs */}
+          <PlatformKPIs />
 
-        {/* Charts Grid */}
-        <div className="grid lg:grid-cols-3 gap-6 mt-6">
-          <div className="lg:col-span-2">
+          {/* Charts Row */}
+          <div className="grid lg:grid-cols-2 gap-6">
             <RevenueGrowth />
+            <UserGrowth />
           </div>
-          <PlanDistribution />
-        </div>
 
-        {/* User Growth & Conversion */}
-        <div className="grid lg:grid-cols-2 gap-6 mt-6">
-          <UserGrowth />
-          <ConversionMetrics />
-        </div>
+          {/* Metrics Row */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <PlanDistribution />
+            <ConversionMetrics />
+          </div>
 
-        {/* Tables */}
-        <div className="grid lg:grid-cols-2 gap-6 mt-6">
-          <SubscriptionsTable />
-          <RecentPayments />
+          {/* Tables */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <SubscriptionsTable />
+            <RecentPayments />
+          </div>
         </div>
-      </AppShell>
-    </ProtectedRoute>
+      </AdminLayout>
+    </>
   );
 }
