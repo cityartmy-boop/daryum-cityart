@@ -18,7 +18,7 @@ import {
 import { Sidebar } from "./Sidebar";
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const unreadCount = 3;
 
   return (
@@ -67,11 +67,11 @@ export function Header() {
             <Button variant="ghost" className="gap-2 sm:gap-3 h-auto p-2 hover:bg-muted/50 rounded-xl">
               <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180 hidden sm:block" />
               <div className="text-right hidden md:block">
-                <div className="font-bold text-sm">{user?.name || "أحمد الشمري"}</div>
-                <div className="text-xs text-muted-foreground">{user?.company || "شركة الشمري العقارية"}</div>
+                <div className="font-bold text-sm">{user?.user_metadata?.full_name || "أحمد الشمري"}</div>
+                <div className="text-xs text-muted-foreground">{user?.user_metadata?.company || "شركة الشمري العقارية"}</div>
               </div>
               <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full gradient-primary flex items-center justify-center text-white font-bold shadow-lg">
-                {(user?.name || "أحمد").charAt(0)}
+                {(user?.user_metadata?.full_name || "أحمد").charAt(0)}
               </div>
             </Button>
           </DropdownMenuTrigger>
@@ -92,7 +92,7 @@ export function Header() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
-              onClick={logout}
+              onClick={signOut}
               className="text-destructive focus:text-destructive cursor-pointer hover:bg-destructive/10"
             >
               <span className="flex-1 text-right font-semibold">تسجيل الخروج</span>

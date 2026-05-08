@@ -20,7 +20,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const { signUp } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,13 +42,7 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await register({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        company: formData.company,
-        password: formData.password
-      });
+      await signUp(formData.email, formData.password, formData.name);
     } catch (err: any) {
       setError(err.message);
     } finally {
