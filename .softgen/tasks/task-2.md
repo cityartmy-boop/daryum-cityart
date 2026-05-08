@@ -3,29 +3,26 @@ title: Executive Dashboard
 status: done
 priority: high
 type: feature
-tags: [dashboard, kpis, charts, analytics]
+tags: [dashboard, analytics, charts]
 created_by: agent
-created_at: 2026-05-07
+created_at: 2026-05-08T15:50:46Z
 position: 2
 ---
 
 ## Notes
-إنشاء لوحة تحكم تنفيذية شاملة مع KPIs وcharts ومكونات تحليلية. التصميم premium مع الألوان الجديدة (تيل + كحلي + ذهبي).
+Main dashboard with realistic Saudi market KPIs, premium charts, and operational insights.
 
 ## Checklist
-- [x] AppShell + Sidebar + Header
-- [x] نظام الصلاحيات الكامل (6 أدوار)
-- [x] KPI Cards (8 بطاقات)
-- [x] Revenue Chart (Area chart)
-- [x] Occupancy Chart (Line chart)
-- [x] Channel Performance (Bar chart)
-- [x] Recent Reservations
-- [x] Today's Operations
-- [x] AI Insights
-- [x] Responsive للجوال (Mobile menu)
+- [x] KPI cards (Revenue, Occupancy, ADR, RevPAR) with SAR currency
+- [x] Revenue trend chart
+- [x] Occupancy chart
+- [x] Channel performance breakdown
+- [x] Recent reservations list
+- [x] Today's operations summary
+- [x] AI insights section
 
 ## Acceptance
-- Dashboard يعمل بشكل كامل
-- جميع Charts تعرض بيانات واقعية
-- الصلاحيات تعمل (تغيير الدور يُظهر/يخفي الصفحات)
-- Responsive على الجوال
+- Dashboard displays realistic SAR-formatted data
+- All currency symbols show ﷼ instead of $
+- Charts render with premium gradients
+- UI feels executive-grade

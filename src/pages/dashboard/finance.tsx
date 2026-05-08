@@ -1,54 +1,108 @@
+import { useState } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DollarSign,
   TrendingUp,
-  CreditCard,
+  TrendingDown,
   Download,
-  Calendar
+  Search,
+  Calendar,
+  CreditCard,
+  Receipt
 } from "lucide-react";
 
 export default function FinancePage() {
+  const [filter, setFilter] = useState("all");
+
+  const stats = [
+    { label: "إجمالي الإيرادات", value: "﷼ 2,480,000", change: "+12.5%", trend: "up", color: "from-primary to-secondary" },
+    { label: "العمولات المدفوعة", value: "﷼ 372,000", change: "-2.1%", trend: "down", color: "from-amber-500 to-orange-500" },
+    { label: "المستحقات للملاك", value: "﷼ 1,864,000", change: "+15.3%", trend: "up", color: "from-blue-500 to-cyan-500" },
+    { label: "صافي الربح", value: "﷼ 244,000", change: "+8.7%", trend: "up", color: "from-emerald-500 to-green-500" },
+  ];
+
   const transactions = [
     {
-      id: "TXN-8421",
+      id: "TXN-2026-001",
+      date: "2026-05-08",
+      type: "revenue",
+      description: "حجز - أحمد السعيد - جناح 101",
+      amount: "﷼ 1,350",
+      status: "completed",
+      channel: "Airbnb",
+      vat: "﷼ 202.50"
+    },
+    {
+      id: "TXN-2026-002",
       date: "2026-05-07",
-      description: "حجز - أحمد السعيد",
-      unit: "جناح 101",
-      type: "revenue",
-      amount: "SAR 2,250",
-      status: "completed"
+      type: "commission",
+      description: "عمولة Booking.com - حجز #4523",
+      amount: "﷼ 450",
+      status: "pending",
+      channel: "Booking.com",
+      vat: "﷼ 67.50"
     },
     {
-      id: "TXN-8422",
+      id: "TXN-2026-003",
       date: "2026-05-06",
-      description: "عمولة Airbnb",
-      unit: "جناح 101",
-      type: "fee",
-      amount: "SAR -225",
-      status: "completed"
-    },
-    {
-      id: "TXN-8423",
-      date: "2026-05-06",
-      description: "مدفوعات المالك - فيصل الدوسري",
-      unit: "فيلا A1",
       type: "payout",
-      amount: "SAR -18,400",
-      status: "pending"
+      description: "دفعة للمالك - أحمد المالكي",
+      amount: "﷼ 18,500",
+      status: "completed",
+      channel: "تحويل بنكي",
+      vat: "﷼ 0"
     },
     {
-      id: "TXN-8424",
+      id: "TXN-2026-004",
       date: "2026-05-05",
-      description: "حجز - سارة الفهد",
-      unit: "فيلا A1",
       type: "revenue",
-      amount: "SAR 4,250",
-      status: "completed"
+      description: "حجز مباشر - خالد عبدالله",
+      amount: "﷼ 2,800",
+      status: "completed",
+      channel: "مباشر",
+      vat: "﷼ 420"
+    },
+    {
+      id: "TXN-2026-005",
+      date: "2026-05-04",
+      type: "expense",
+      description: "صيانة - وحدة B3",
+      amount: "﷼ 850",
+      status: "completed",
+      channel: "نقدي",
+      vat: "﷼ 127.50"
     },
   ];
+
+  const getTypeBadge = (type: string) => {
+    switch(type) {
+      case "revenue": return <Badge className="bg-available">إيراد</Badge>;
+      case "commission": return <Badge className="bg-amber-500">عمولة</Badge>;
+      case "payout": return <Badge className="bg-blue-500">دفعة</Badge>;
+      case "expense": return <Badge variant="destructive">مصروف</Badge>;
+      default: return <Badge variant="outline">غير محدد</Badge>;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case "completed": return <Badge className="bg-primary">مكتمل</Badge>;
+      case "pending": return <Badge className="bg-amber-500">معلق</Badge>;
+      case "failed": return <Badge variant="destructive">فشل</Badge>;
+      default: return <Badge variant="outline">غير معروف</Badge>;
+    }
+  };
 
   return (
     <>
@@ -56,124 +110,127 @@ export default function FinancePage() {
       <AppShell>
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">المالية</h1>
-              <p className="text-muted-foreground">
-                إدارة الإيرادات والمصروفات والمدفوعات
-              </p>
+              <h1 className="text-3xl font-black text-foreground">المالية</h1>
+              <p className="text-muted-foreground">إدارة الإيرادات والمصروفات</p>
             </div>
-            <Button variant="outline" className="gap-2">
-              <Download className="w-4 h-4" />
-              تصدير التقرير
-            </Button>
+            <div className="flex gap-3">
+              <Button variant="outline">
+                <Receipt className="w-5 h-5 ml-2" />
+                تقرير الضريبة
+              </Button>
+              <Button className="gradient-primary">
+                <Download className="w-5 h-5 ml-2" />
+                تصدير
+              </Button>
+            </div>
           </div>
 
-          {/* Financial KPIs */}
+          {/* KPIs */}
           <div className="grid md:grid-cols-4 gap-4">
-            {[
-              { 
-                label: "الإيراد الشهري", 
-                value: "SAR 428,500", 
-                change: "+12.4%",
-                icon: DollarSign, 
-                color: "from-primary to-secondary" 
-              },
-              { 
-                label: "العمولات والرسوم", 
-                value: "SAR 42,850", 
-                change: "+8.2%",
-                icon: CreditCard, 
-                color: "from-amber-500 to-orange-500" 
-              },
-              { 
-                label: "صافي الإيراد", 
-                value: "SAR 385,650", 
-                change: "+14.1%",
-                icon: TrendingUp, 
-                color: "from-emerald-500 to-green-500" 
-              },
-              { 
-                label: "مدفوعات الملاك", 
-                value: "SAR 231,400", 
-                change: "-",
-                icon: Calendar, 
-                color: "from-blue-500 to-cyan-500" 
-              },
-            ].map((kpi, index) => (
+            {stats.map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6">
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${kpi.color} p-3 mb-3`}>
-                  <kpi.icon className="w-full h-full text-white" />
+                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} p-3 mb-3`}>
+                  <DollarSign className="w-full h-full text-white" />
                 </div>
-                <div className="text-2xl font-bold tabular-nums mb-1">{kpi.value}</div>
+                <div className="text-2xl font-bold text-foreground tabular-nums mb-1">{stat.value}</div>
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">{kpi.label}</div>
-                  {kpi.change !== "-" && (
-                    <div className="text-xs text-available font-semibold">{kpi.change}</div>
-                  )}
+                  <span className="text-sm text-muted-foreground">{stat.label}</span>
+                  <span className={`text-sm font-semibold flex items-center gap-1 ${stat.trend === 'up' ? 'text-available' : 'text-destructive'}`}>
+                    {stat.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                    {stat.change}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Transactions Table */}
-          <div className="glass rounded-xl border border-border/50 overflow-hidden">
-            <div className="p-6 border-b border-border/50">
-              <h2 className="text-xl font-bold">المعاملات الأخيرة</h2>
+          {/* Filters */}
+          <div className="glass rounded-xl p-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input 
+                  placeholder="البحث في المعاملات..."
+                  className="pr-10"
+                />
+              </div>
+              <Select defaultValue="all" onValueChange={setFilter}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">كل المعاملات</SelectItem>
+                  <SelectItem value="revenue">إيرادات</SelectItem>
+                  <SelectItem value="commission">عمولات</SelectItem>
+                  <SelectItem value="payout">دفعات</SelectItem>
+                  <SelectItem value="expense">مصروفات</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline">
+                <Calendar className="w-5 h-5 ml-2" />
+                اختر الفترة
+              </Button>
             </div>
+          </div>
+
+          {/* Transactions Table */}
+          <div className="glass rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-muted/30 border-b border-border/50">
-                  <tr>
-                    <th className="text-right p-4 font-semibold text-sm">رقم المعاملة</th>
-                    <th className="text-right p-4 font-semibold text-sm">التاريخ</th>
-                    <th className="text-right p-4 font-semibold text-sm">الوصف</th>
-                    <th className="text-right p-4 font-semibold text-sm">الوحدة</th>
-                    <th className="text-right p-4 font-semibold text-sm">النوع</th>
-                    <th className="text-right p-4 font-semibold text-sm">المبلغ</th>
-                    <th className="text-right p-4 font-semibold text-sm">الحالة</th>
+                <thead className="bg-muted/50">
+                  <tr className="text-right">
+                    <th className="p-4 font-bold text-foreground">رقم المعاملة</th>
+                    <th className="p-4 font-bold text-foreground">التاريخ</th>
+                    <th className="p-4 font-bold text-foreground">النوع</th>
+                    <th className="p-4 font-bold text-foreground">الوصف</th>
+                    <th className="p-4 font-bold text-foreground">المبلغ</th>
+                    <th className="p-4 font-bold text-foreground">ضريبة القيمة المضافة</th>
+                    <th className="p-4 font-bold text-foreground">القناة</th>
+                    <th className="p-4 font-bold text-foreground">الحالة</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((txn) => (
-                    <tr key={txn.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                  {transactions.map((transaction) => (
+                    <tr key={transaction.id} className="border-t border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="p-4">
-                        <div className="font-mono text-sm font-semibold">{txn.id}</div>
+                        <div className="font-mono text-sm text-primary">{transaction.id}</div>
                       </td>
+                      <td className="p-4 text-muted-foreground">{transaction.date}</td>
+                      <td className="p-4">{getTypeBadge(transaction.type)}</td>
+                      <td className="p-4 text-foreground">{transaction.description}</td>
                       <td className="p-4">
-                        <div className="text-sm">{txn.date}</div>
+                        <div className="font-bold text-foreground tabular-nums">{transaction.amount}</div>
                       </td>
+                      <td className="p-4 text-muted-foreground tabular-nums">{transaction.vat}</td>
                       <td className="p-4">
-                        <div className="font-medium">{txn.description}</div>
+                        <Badge variant="outline">{transaction.channel}</Badge>
                       </td>
-                      <td className="p-4">
-                        <div className="text-sm text-muted-foreground">{txn.unit}</div>
-                      </td>
-                      <td className="p-4">
-                        <Badge variant={
-                          txn.type === "revenue" ? "default" : 
-                          txn.type === "fee" ? "secondary" : 
-                          "outline"
-                        }>
-                          {txn.type === "revenue" ? "إيراد" : txn.type === "fee" ? "عمولة" : "مدفوعات"}
-                        </Badge>
-                      </td>
-                      <td className="p-4">
-                        <div className={`font-bold tabular-nums ${
-                          txn.amount.includes("-") ? "text-destructive" : "text-available"
-                        }`}>
-                          {txn.amount}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <Badge className={txn.status === "completed" ? "bg-available" : "bg-accent text-secondary"}>
-                          {txn.status === "completed" ? "مكتمل" : "معلق"}
-                        </Badge>
-                      </td>
+                      <td className="p-4">{getStatusBadge(transaction.status)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* VAT Summary */}
+          <div className="glass rounded-xl p-6">
+            <h3 className="text-xl font-bold text-foreground mb-6">ملخص ضريبة القيمة المضافة</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="p-6 rounded-xl bg-muted/30">
+                <div className="text-sm text-muted-foreground mb-2">الضريبة المستحقة</div>
+                <div className="text-3xl font-bold text-foreground tabular-nums">﷼ 124,500</div>
+              </div>
+              <div className="p-6 rounded-xl bg-muted/30">
+                <div className="text-sm text-muted-foreground mb-2">الضريبة المدفوعة</div>
+                <div className="text-3xl font-bold text-primary tabular-nums">﷼ 98,200</div>
+              </div>
+              <div className="p-6 rounded-xl bg-muted/30">
+                <div className="text-sm text-muted-foreground mb-2">الضريبة المتبقية</div>
+                <div className="text-3xl font-bold text-amber-500 tabular-nums">﷼ 26,300</div>
+              </div>
             </div>
           </div>
         </div>
