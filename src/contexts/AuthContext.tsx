@@ -1,138 +1,93 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/router";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  role: "admin" | "manager" | "owner" | "staff";
-  avatar?: string;
-  createdAt: string;
-}
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
-  logout: () => void;
-  updateProfile: (data: Partial<User>) => Promise<void>;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signOut: () => Promise<void>;
   isAuthenticated: boolean;
-  isLoading: boolean;
-}
-
-interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  company: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in (from localStorage)
-    const storedUser = localStorage.getItem("daryum_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock user data
-      const mockUser: User = {
-        id: "usr_123456",
-        name: "أحمد محمد الشمري",
-        email: email,
-        phone: "+966 50 123 4567",
-        company: "مجموعة الشمري العقارية",
-        role: "admin",
-        createdAt: "2026-01-15T10:00:00Z"
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem("daryum_user", JSON.stringify(mockUser));
-      router.push("/dashboard");
-    } catch (error) {
-      throw new Error("فشل تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.");
-    } finally {
-      setIsLoading(false);
-    }
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+
+        // Redirect after sign in
+        if (event === "SIGNED_IN" && session) {
+          router.push("/dashboard");
+        }
+
+        // Redirect after sign out
+        if (event === "SIGNED_OUT") {
+          router.push("/login");
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
   };
 
-  const register = async (data: RegisterData) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newUser: User = {
-        id: "usr_" + Math.random().toString(36).substr(2, 9),
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        company: data.company,
-        role: "manager",
-        createdAt: new Date().toISOString()
-      };
-      
-      setUser(newUser);
-      localStorage.setItem("daryum_user", JSON.stringify(newUser));
-      router.push("/dashboard");
-    } catch (error) {
-      throw new Error("فشل إنشاء الحساب. حاول مرة أخرى.");
-    } finally {
-      setIsLoading(false);
-    }
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+
+    if (error) throw error;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("daryum_user");
-    router.push("/login");
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   };
 
-  const updateProfile = async (data: Partial<User>) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const updatedUser = { ...user, ...data } as User;
-      setUser(updatedUser);
-      localStorage.setItem("daryum_user", JSON.stringify(updatedUser));
-    } catch (error) {
-      throw new Error("فشل تحديث الملف الشخصي.");
-    } finally {
-      setIsLoading(false);
-    }
+  const value = {
+    user,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    isAuthenticated: !!user,
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        register,
-        logout,
-        updateProfile,
-        isAuthenticated: !!user,
-        isLoading
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

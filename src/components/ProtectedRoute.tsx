@@ -4,41 +4,39 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireAdmin?: boolean;
+  requiredRole?: string[];
 }
 
-export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!loading && !user) {
       router.push("/login");
     }
-    
-    if (!isLoading && requireAdmin && user?.role !== "admin") {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, isLoading, requireAdmin, user, router]);
+  }, [user, loading, router]);
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-soft">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">جارٍ التحميل...</p>
+          <p className="text-muted-foreground">جاري التحميل...</p>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return null;
   }
 
-  if (requireAdmin && user?.role !== "admin") {
-    return null;
-  }
+  // TODO: Add role checking when user roles are implemented
+  // if (requiredRole && !requiredRole.includes(user.role)) {
+  //   router.push("/unauthorized");
+  //   return null;
+  // }
 
   return <>{children}</>;
 }
