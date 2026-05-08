@@ -4,16 +4,28 @@ import { AppShell } from "@/components/dashboard/AppShell";
 import { PropertyDialog } from "@/components/dashboard/PropertyDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Building2,
   Plus,
   Eye,
   Pencil,
   Trash2,
-  DollarSign,
   Users,
   Percent,
-  Filter
+  Filter,
+  Search,
+  Home,
+  TrendingUp,
+  MapPin,
+  Banknote
 } from "lucide-react";
 import {
   AlertDialog,
@@ -42,10 +54,11 @@ export default function PropertiesPage() {
       units: 24,
       occupied: 18,
       available: 6,
-      revenue: "456,000",
+      revenue: "﷼ 456,000",
       occupancy: 75,
       status: "active",
-      image: "/property-1.jpg"
+      type: "فندقية",
+      image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800"
     },
     {
       id: 2,
@@ -54,7 +67,7 @@ export default function PropertiesPage() {
       image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800",
       units: 16,
       occupied: 14,
-      revenue: "SAR 192,300",
+      revenue: "﷼ 192,300",
       occupancy: 88,
       status: "active",
       type: "سكنية"
@@ -66,7 +79,7 @@ export default function PropertiesPage() {
       image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
       units: 8,
       occupied: 6,
-      revenue: "SAR 156,800",
+      revenue: "﷼ 156,800",
       occupancy: 75,
       status: "active",
       type: "فلل"
@@ -78,7 +91,7 @@ export default function PropertiesPage() {
       image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800",
       units: 12,
       occupied: 8,
-      revenue: "SAR 128,400",
+      revenue: "﷼ 128,400",
       occupancy: 67,
       status: "active",
       type: "شاليهات"
@@ -90,7 +103,7 @@ export default function PropertiesPage() {
       image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
       units: 32,
       occupied: 28,
-      revenue: "SAR 358,200",
+      revenue: "﷼ 358,200",
       occupancy: 88,
       status: "active",
       type: "سكنية"
@@ -102,7 +115,7 @@ export default function PropertiesPage() {
       image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800",
       units: 18,
       occupied: 12,
-      revenue: "SAR 168,900",
+      revenue: "﷼ 168,900",
       occupancy: 67,
       status: "maintenance",
       type: "فندقية"
@@ -156,7 +169,7 @@ export default function PropertiesPage() {
               { label: "إجمالي العقارات", value: "6", icon: Building2, color: "from-primary to-secondary" },
               { label: "إجمالي الوحدات", value: "110", icon: Home, color: "from-blue-500 to-cyan-500" },
               { label: "متوسط الإشغال", value: "77%", icon: TrendingUp, color: "from-emerald-500 to-green-500" },
-              { label: "الإيراد الشهري", value: "SAR 1.29M", icon: TrendingUp, color: "from-amber-500 to-orange-500" },
+              { label: "الإيراد الشهري", value: "﷼ 1.29M", icon: Banknote, color: "from-amber-500 to-orange-500" },
             ].map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6">
                 <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} p-3 mb-3`}>

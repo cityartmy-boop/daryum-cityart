@@ -4,13 +4,26 @@ import { AppShell } from "@/components/dashboard/AppShell";
 import { UnitDialog } from "@/components/dashboard/UnitDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Home,
   Plus,
   Eye,
   Pencil,
   Trash2,
-  Filter
+  Filter,
+  Search,
+  DoorOpen,
+  Users,
+  BedDouble,
+  Edit
 } from "lucide-react";
 import {
   AlertDialog,
@@ -40,7 +53,7 @@ export default function UnitsPage() {
       type: "غرفتين وصالة",
       capacity: 4,
       beds: 2,
-      price: "SAR 450",
+      price: "﷼ 450",
       status: "available",
       image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
     },
@@ -51,7 +64,7 @@ export default function UnitsPage() {
       type: "غرفة وصالة",
       capacity: 2,
       beds: 1,
-      price: "SAR 300",
+      price: "﷼ 300",
       status: "occupied",
       image: "https://images.unsplash.com/photo-1502672260266-1c1de24220e8?w=800",
     },
@@ -62,7 +75,7 @@ export default function UnitsPage() {
       type: "3 غرف وصالة",
       capacity: 6,
       beds: 3,
-      price: "SAR 850",
+      price: "﷼ 850",
       status: "cleaning",
       image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
     },
@@ -73,7 +86,7 @@ export default function UnitsPage() {
       type: "غرفتين وصالة",
       capacity: 4,
       beds: 2,
-      price: "SAR 500",
+      price: "﷼ 500",
       status: "maintenance",
       image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
     },
@@ -202,49 +215,20 @@ export default function UnitsPage() {
                       <span className="font-bold text-foreground">{unit.price}</span>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleView(unit)}>
                         <Eye className="w-4 h-4" />
                       </Button>
-                      {hasPermission("canManageUnits") && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleEdit(unit)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(unit)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Add action buttons to each unit card */}
-          <div className="p-4 border-t border-border/50 flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => handleView(unit)}
-            >
-              <Eye className="w-4 h-4 ml-2" />
-              عرض
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => handleEdit(unit)}
-            >
-              <Pencil className="w-4 h-4 ml-2" />
-              تعديل
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:bg-destructive/10"
-              onClick={() => handleDelete(unit)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
           </div>
         </div>
 
