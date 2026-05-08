@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Header } from "@/components/dashboard/Header";
-import { AdminSidebar } from "./AdminSidebar";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -8,7 +8,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" dir="rtl">
       <Header />
       <div className="flex">
         <div className="flex-1 p-8">

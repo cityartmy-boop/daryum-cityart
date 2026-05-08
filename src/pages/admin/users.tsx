@@ -37,7 +37,9 @@ import {
   Trash2,
   Filter,
   Download,
-  UserCog
+  UserCog,
+  User,
+  Eye
 } from "lucide-react";
 
 export default function AdminUsersPage() {
@@ -204,65 +206,52 @@ export default function AdminUsersPage() {
           {/* Users Table */}
           <div className="glass rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" dir="rtl">
                 <thead className="bg-muted/50">
                   <tr className="text-right">
-                    <th className="p-4 font-bold text-foreground">المستخدم</th>
-                    <th className="p-4 font-bold text-foreground">معلومات الاتصال</th>
+                    <th className="p-4 font-bold text-foreground">الاسم</th>
+                    <th className="p-4 font-bold text-foreground">البريد الإلكتروني</th>
                     <th className="p-4 font-bold text-foreground">الدور</th>
-                    <th className="p-4 font-bold text-foreground">المساحة</th>
-                    <th className="p-4 font-bold text-foreground">العقارات</th>
                     <th className="p-4 font-bold text-foreground">تاريخ الانضمام</th>
-                    <th className="p-4 font-bold text-foreground">آخر نشاط</th>
                     <th className="p-4 font-bold text-foreground">الحالة</th>
-                    <th className="p-4 font-bold text-foreground">إجراءات</th>
+                    <th className="p-4 font-bold text-foreground text-center">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <tr key={user.id} className="border-t border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                            {user.name.charAt(0)}
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="w-5 h-5 text-primary" />
                           </div>
-                          <div>
+                          <div className="text-right">
                             <div className="font-semibold text-foreground">{user.name}</div>
-                            <div className="text-xs text-muted-foreground">ID: {user.id}</div>
+                            <div className="text-xs text-muted-foreground">{user.id}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4">
-                        <div className="text-sm text-foreground">{user.email}</div>
-                        <div className="text-xs text-muted-foreground">{user.phone}</div>
+                      <td className="p-4 text-muted-foreground text-right">{user.email}</td>
+                      <td className="p-4 text-right">
+                        <Badge className={getRoleBadgeColor(user.role)}>{user.role}</Badge>
                       </td>
-                      <td className="p-4">{getRoleBadge(user.role)}</td>
-                      <td className="p-4 text-muted-foreground">{user.workspace}</td>
-                      <td className="p-4 font-semibold text-foreground">{user.properties}</td>
-                      <td className="p-4 text-muted-foreground">{user.joinedAt}</td>
-                      <td className="p-4 text-muted-foreground">{user.lastActive}</td>
-                      <td className="p-4">{getStatusBadge(user.status)}</td>
+                      <td className="p-4 text-muted-foreground text-right">{user.joinedAt}</td>
+                      <td className="p-4 text-right">
+                        {user.status === "active" ? (
+                          <Badge className="bg-available">نشط</Badge>
+                        ) : (
+                          <Badge variant="outline">غير نشط</Badge>
+                        )}
+                      </td>
                       <td className="p-4">
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setEditDialogOpen(true);
-                            }}
-                          >
+                        <div className="flex items-center justify-center gap-2">
+                          <Button size="sm" variant="outline" onClick={() => handleView(user)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive"
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
+                          <Button size="sm" variant="destructive" onClick={() => handleDelete(user)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
