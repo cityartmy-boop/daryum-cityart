@@ -21,20 +21,6 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<"testing" | "connected" | "failed">("testing");
-
-  // Test connection on mount
-  useState(() => {
-    const testConnection = async () => {
-      try {
-        const { error } = await supabase.auth.getSession();
-        setConnectionStatus(error ? "failed" : "connected");
-      } catch {
-        setConnectionStatus("failed");
-      }
-    };
-    testConnection();
-  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -61,34 +47,61 @@ export default function Register() {
     console.log("Email:", formData.email);
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // Sign up with auto-confirm enabled
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             full_name: formData.name,
           },
+          emailRedirectTo: undefined, // No email confirmation needed
         },
       });
 
       if (signUpError) throw signUpError;
 
-      console.log("✅ Account created!", data);
-      setSuccess(true);
-      
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1500);
+      console.log("✅ Account created!", signUpData);
+
+      // Check if user is already confirmed (auto-confirm enabled)
+      if (signUpData.user && signUpData.session) {
+        console.log("✅ User auto-confirmed and logged in!");
+        setSuccess(true);
+        
+        // Redirect to dashboard after 1 second
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1000);
+      } else if (signUpData.user && !signUpData.session) {
+        // Email confirmation required (shouldn't happen if auto-confirm is enabled)
+        console.log("⚠️ Email confirmation required");
+        setError("تم إنشاء الحساب بنجاح! ولكن يتطلب تأكيد البريد الإلكتروني.\n\nجرب تسجيل الدخول مباشرة بنفس البيانات.");
+        
+        // Try to sign in immediately
+        setTimeout(async () => {
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          });
+
+          if (!signInError && signInData.session) {
+            console.log("✅ Signed in successfully after registration!");
+            setSuccess(true);
+            setTimeout(() => router.push("/dashboard"), 1000);
+          }
+        }, 1500);
+      }
 
     } catch (err: any) {
-      console.error("❌ Error:", err);
+      console.error("❌ Registration error:", err);
       
       let errorMessage = "حدث خطأ أثناء إنشاء الحساب";
       
       if (err.message?.includes("fetch")) {
         errorMessage = "⚠️ لا يمكن الاتصال بالخادم\n\nالحل:\n1. تحقق من اتصال الإنترنت\n2. تأكد أن Supabase Project نشط\n3. جرب إعادة تحميل الصفحة";
-      } else if (err.message?.includes("already registered")) {
+      } else if (err.message?.includes("already registered") || err.message?.includes("User already registered")) {
         errorMessage = "هذا البريد مسجل مسبقاً - جرب تسجيل الدخول";
+        setTimeout(() => router.push("/login"), 2000);
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -110,8 +123,11 @@ export default function Register() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold mb-4">🎉 تم إنشاء حسابك بنجاح!</h1>
-            <p className="text-muted-foreground mb-8">
+            <h1 className="text-3xl font-bold mb-4">🎉 مرحباً بك في داريوم!</h1>
+            <p className="text-muted-foreground mb-2">
+              تم إنشاء حسابك وتسجيل دخولك بنجاح
+            </p>
+            <p className="text-sm text-muted-foreground mb-8">
               سيتم تحويلك إلى لوحة التحكم...
             </p>
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -143,19 +159,6 @@ export default function Register() {
           <div className="bg-card border border-border rounded-2xl p-8 shadow-lg">
             <h1 className="text-3xl font-bold mb-2">إنشاء حساب جديد</h1>
             <p className="text-muted-foreground mb-6">انضم لآلاف مدراء العقارات</p>
-
-            {/* Connection Status */}
-            {connectionStatus === "failed" && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-semibold text-destructive mb-1">⚠️ مشكلة في الاتصال</p>
-                  <p className="text-destructive/80">
-                    لا يمكن الاتصال بـ Supabase. تحقق من اتصال الإنترنت أو أعد تحميل الصفحة.
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Error Message */}
             {error && (
@@ -246,7 +249,7 @@ export default function Register() {
               <Button
                 type="submit"
                 className="w-full bg-primary hover:bg-primary/90 h-12 text-lg mt-6"
-                disabled={isLoading || connectionStatus === "failed"}
+                disabled={isLoading}
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -270,11 +273,11 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Help Box */}
+          {/* Success Info */}
           <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl text-sm">
-            <p className="font-semibold mb-2 text-primary">💡 هل تواجه مشكلة؟</p>
+            <p className="font-semibold mb-2 text-primary">✨ ما بعد التسجيل</p>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              افتح Console (F12) → ابحث عن رسائل الأخطاء → شارك الرسالة للمساعدة
+              بعد إنشاء الحساب، سيتم تسجيل دخولك تلقائياً وتحويلك إلى لوحة التحكم
             </p>
           </div>
         </div>
