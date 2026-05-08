@@ -19,6 +19,7 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
 
@@ -29,7 +30,9 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
 
+    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError("كلمات المرور غير متطابقة");
       return;
@@ -41,14 +44,58 @@ export default function Register() {
     }
 
     setIsLoading(true);
+    console.log("📝 Attempting signup with:", formData.email);
+
     try {
       await signUp(formData.email, formData.password, formData.name);
+      console.log("✅ Signup successful!");
+      setSuccess(true);
     } catch (err: any) {
-      setError(err.message);
+      console.error("❌ Signup error:", err);
+      
+      // Better error messages in Arabic
+      let errorMessage = "حدث خطأ أثناء إنشاء الحساب";
+      
+      if (err.message?.includes("already registered")) {
+        errorMessage = "هذا البريد الإلكتروني مسجل مسبقاً";
+      } else if (err.message?.includes("Password should be at least")) {
+        errorMessage = "كلمة المرور ضعيفة جداً";
+      } else if (err.message?.includes("invalid email")) {
+        errorMessage = "البريد الإلكتروني غير صحيح";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <>
+        <SEO title="تم إنشاء الحساب - داريوم" />
+        <div className="min-h-screen flex items-center justify-center p-8">
+          <div className="w-full max-w-md text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold mb-4">🎉 تم إنشاء حسابك بنجاح!</h1>
+            <p className="text-muted-foreground mb-8">
+              سيتم تحويلك إلى لوحة التحكم خلال ثوانٍ...
+            </p>
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              جارٍ التحويل...
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -68,11 +115,11 @@ export default function Register() {
               />
             </Link>
             <h1 className="text-3xl font-bold mb-2">إنشاء حساب جديد</h1>
-            <p className="text-muted-foreground">انضم لآلاف مدراء العقارات</p>
+            <p className="text-muted-foreground mb-6">انضم لآلاف مدراء العقارات</p>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm text-center">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm">
                 {error}
               </div>
             )}
@@ -115,7 +162,7 @@ export default function Register() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-right block">رقم الجوال</Label>
+                <Label htmlFor="phone" className="text-right block">رقم الجوال (اختياري)</Label>
                 <div className="relative">
                   <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
@@ -126,14 +173,13 @@ export default function Register() {
                     value={formData.phone}
                     onChange={handleChange}
                     className="pr-11 text-right"
-                    required
                     dir="ltr"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company" className="text-right block">اسم الشركة</Label>
+                <Label htmlFor="company" className="text-right block">اسم الشركة (اختياري)</Label>
                 <div className="relative">
                   <Building2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
@@ -144,7 +190,6 @@ export default function Register() {
                     value={formData.company}
                     onChange={handleChange}
                     className="pr-11 text-right"
-                    required
                   />
                 </div>
               </div>
@@ -171,6 +216,7 @@ export default function Register() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                <p className="text-xs text-muted-foreground text-right">6 أحرف على الأقل</p>
               </div>
 
               <div className="space-y-2">
@@ -192,16 +238,16 @@ export default function Register() {
 
               <Button
                 type="submit"
-                className="w-full gradient-primary text-white text-lg h-12 glow-hover mt-6"
+                className="w-full bg-primary hover:bg-primary/90 text-white text-lg h-12 mt-6"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 justify-center">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     جارٍ إنشاء الحساب...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 justify-center">
                     إنشاء حساب
                     <ArrowRight className="w-5 h-5" />
                   </span>

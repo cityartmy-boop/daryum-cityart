@@ -23,10 +23,28 @@ export default function Login() {
     setError("");
     setIsLoading(true);
 
+    console.log("🔐 Attempting login with:", email);
+
     try {
       await signIn(email, password);
+      console.log("✅ Login successful!");
     } catch (err: any) {
-      setError(err.message);
+      console.error("❌ Login error:", err);
+      
+      // Better error messages in Arabic
+      let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
+      
+      if (err.message?.includes("Invalid login credentials")) {
+        errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+      } else if (err.message?.includes("Email not confirmed")) {
+        errorMessage = "يرجى تأكيد بريدك الإلكتروني أولاً";
+      } else if (err.message?.includes("User not found")) {
+        errorMessage = "لا يوجد حساب بهذا البريد الإلكتروني";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -50,11 +68,11 @@ export default function Login() {
               />
             </Link>
             <h1 className="text-3xl font-bold mb-2">مرحباً بعودتك</h1>
-            <p className="text-muted-foreground">سجل دخولك لإدارة عقاراتك</p>
+            <p className="text-muted-foreground mb-6">سجل دخولك لإدارة عقاراتك</p>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm text-center">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 mb-6 text-sm">
                 {error}
               </div>
             )}
@@ -101,24 +119,18 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <Link href="/forgot-password" className="text-primary hover:underline">
-                  نسيت كلمة المرور؟
-                </Link>
-              </div>
-
               <Button
                 type="submit"
-                className="w-full gradient-primary text-white text-lg h-12 glow-hover"
+                className="w-full bg-primary hover:bg-primary/90 text-white text-lg h-12"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 justify-center">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     جارٍ تسجيل الدخول...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 justify-center">
                     تسجيل الدخول
                     <ArrowRight className="w-5 h-5" />
                   </span>
@@ -134,10 +146,12 @@ export default function Login() {
               </Link>
             </div>
 
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-muted/30 rounded-xl text-sm">
-              <p className="font-semibold mb-2 text-center">للتجربة السريعة:</p>
-              <p className="text-muted-foreground text-center">أي بريد إلكتروني + أي كلمة مرور</p>
+            {/* Help Message */}
+            <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl text-sm">
+              <p className="font-semibold mb-2 text-center text-primary">💡 تلميح</p>
+              <p className="text-muted-foreground text-center">
+                يجب إنشاء حساب جديد أولاً عبر صفحة التسجيل
+              </p>
             </div>
           </div>
         </div>
