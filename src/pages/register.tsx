@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function Register() {
   const router = useRouter();
@@ -47,7 +47,7 @@ export default function Register() {
     console.log("Email:", formData.email);
 
     try {
-      // Sign up with auto-confirm enabled
+      // Sign up
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -55,7 +55,6 @@ export default function Register() {
           data: {
             full_name: formData.name,
           },
-          emailRedirectTo: undefined, // No email confirmation needed
         },
       });
 
@@ -63,33 +62,35 @@ export default function Register() {
 
       console.log("✅ Account created!", signUpData);
 
-      // Check if user is already confirmed (auto-confirm enabled)
+      // Check if auto-confirmed
       if (signUpData.user && signUpData.session) {
         console.log("✅ User auto-confirmed and logged in!");
         setSuccess(true);
         
-        // Redirect to dashboard after 1 second
+        // Redirect with page reload to ensure session is picked up
         setTimeout(() => {
-          router.push("/dashboard");
-        }, 1000);
-      } else if (signUpData.user && !signUpData.session) {
-        // Email confirmation required (shouldn't happen if auto-confirm is enabled)
-        console.log("⚠️ Email confirmation required");
-        setError("تم إنشاء الحساب بنجاح! ولكن يتطلب تأكيد البريد الإلكتروني.\n\nجرب تسجيل الدخول مباشرة بنفس البيانات.");
+          window.location.href = "/dashboard";
+        }, 1500);
+      } else {
+        console.log("⚠️ Account created but session not active - trying manual login");
         
         // Try to sign in immediately
-        setTimeout(async () => {
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: formData.email,
-            password: formData.password,
-          });
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
 
-          if (!signInError && signInData.session) {
-            console.log("✅ Signed in successfully after registration!");
-            setSuccess(true);
-            setTimeout(() => router.push("/dashboard"), 1000);
-          }
-        }, 1500);
+        if (signInError) {
+          console.error("❌ Auto-login failed:", signInError);
+          setError("تم إنشاء الحساب بنجاح! الآن سجّل دخولك من صفحة تسجيل الدخول");
+          setTimeout(() => router.push("/login"), 2000);
+        } else if (signInData.session) {
+          console.log("✅ Manual login successful!");
+          setSuccess(true);
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 1500);
+        }
       }
 
     } catch (err: any) {
@@ -98,7 +99,7 @@ export default function Register() {
       let errorMessage = "حدث خطأ أثناء إنشاء الحساب";
       
       if (err.message?.includes("fetch")) {
-        errorMessage = "⚠️ لا يمكن الاتصال بالخادم\n\nالحل:\n1. تحقق من اتصال الإنترنت\n2. تأكد أن Supabase Project نشط\n3. جرب إعادة تحميل الصفحة";
+        errorMessage = "⚠️ لا يمكن الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
       } else if (err.message?.includes("already registered") || err.message?.includes("User already registered")) {
         errorMessage = "هذا البريد مسجل مسبقاً - جرب تسجيل الدخول";
         setTimeout(() => router.push("/login"), 2000);

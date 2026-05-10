@@ -26,6 +26,7 @@ export default function Login() {
     console.log("Email:", email);
 
     try {
+      // Sign in
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -37,18 +38,29 @@ export default function Login() {
       }
 
       console.log("✅ Login successful!", data);
-      router.push("/dashboard");
+      
+      // Verify session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log("Session after login:", session);
+
+      if (session) {
+        console.log("✅ Session confirmed - redirecting to dashboard");
+        
+        // Force reload to ensure ProtectedRoute gets the session
+        window.location.href = "/dashboard";
+      } else {
+        throw new Error("Session not created after login");
+      }
 
     } catch (err: any) {
       console.error("❌ Login error:", err);
       
-      // Better error messages in Arabic
       let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
       
       if (err.message?.includes("Invalid login credentials")) {
         errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
       } else if (err.message?.includes("Email not confirmed")) {
-        errorMessage = "يرجى تأكيد بريدك الإلكتروني أولاً";
+        errorMessage = "يرجى تأكيد بريدك الإلكتروني أولاً (لكن هذا غير مفترض!)";
       } else if (err.message?.includes("fetch")) {
         errorMessage = "❌ فشل الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
       } else if (err.message) {
@@ -56,7 +68,6 @@ export default function Login() {
       }
       
       setError(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -162,7 +173,7 @@ export default function Login() {
           <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl text-sm">
             <p className="font-semibold mb-2 text-center text-primary">💡 نصيحة</p>
             <p className="text-muted-foreground text-center">
-              إذا نسيت كلمة المرور، يمكنك إنشاء حساب جديد
+              بعد تسجيل الدخول، سيتم تحويلك تلقائياً لل Dashboard
             </p>
           </div>
         </div>
