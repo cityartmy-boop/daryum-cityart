@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { UnitDialog } from "@/components/dashboard/UnitDialog";
@@ -35,62 +35,49 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UnitsPage() {
+  const { toast } = useToast();
   const [filter, setFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
+  const [units, setUnits] = useState<any[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Mock units data
-  const units = [
-    {
-      id: 1,
-      property: "برج الفيصلية",
-      name: "جناح 101",
-      type: "غرفتين وصالة",
-      capacity: 4,
-      beds: 2,
-      price: "﷼ 450",
-      status: "available",
-      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-    },
-    {
-      id: 2,
-      property: "برج الفيصلية",
-      name: "جناح 102",
-      type: "غرفة وصالة",
-      capacity: 2,
-      beds: 1,
-      price: "﷼ 300",
-      status: "occupied",
-      image: "https://images.unsplash.com/photo-1502672260266-1c1de24220e8?w=800",
-    },
-    {
-      id: 3,
-      property: "أجنحة النخيل",
-      name: "فيلا A1",
-      type: "3 غرف وصالة",
-      capacity: 6,
-      beds: 3,
-      price: "﷼ 850",
-      status: "cleaning",
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-    },
-    {
-      id: 4,
-      property: "أجنحة النخيل",
-      name: "شقة B2",
-      type: "غرفتين وصالة",
-      capacity: 4,
-      beds: 2,
-      price: "﷼ 500",
-      status: "maintenance",
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-    },
-  ];
+  // Fetch units from Supabase
+  const fetchUnits = async () => {
+    const { data, error } = await supabase
+      .from("units")
+      .select(`
+        *,
+        properties (
+          id,
+          name,
+          name_ar
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching units:", error);
+      toast({
+        title: "❌ خطأ في تحميل البيانات",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setUnits(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnits();
+  }, []);
 
   const filteredUnits = filter === "all" 
     ? units 
@@ -111,10 +98,34 @@ export default function UnitsPage() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Deleting unit:", selectedUnit);
-    setDeleteDialogOpen(false);
-    setSelectedUnit(null);
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("units")
+        .delete()
+        .eq("id", selectedUnit.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم الحذف بنجاح",
+        description: `تم حذف "${selectedUnit.name}" من قائمة الوحدات`,
+      });
+
+      await fetchUnits();
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "❌ فشل الحذف",
+        description: error.message || "حدث خطأ أثناء حذف الوحدة",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setSelectedUnit(null);
+    }
   };
 
   const handleView = (unit: any) => {
@@ -125,6 +136,10 @@ export default function UnitsPage() {
   const handleEdit = (unit: any) => {
     setSelectedUnit(unit);
     setEditDialogOpen(true);
+  };
+
+  const handleSuccess = () => {
+    fetchUnits();
   };
 
   return (
@@ -247,9 +262,13 @@ export default function UnitsPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDelete} className="bg-destructive">
-                حذف
+              <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete} 
+                disabled={isDeleting}
+                className="bg-destructive"
+              >
+                {isDeleting ? "جاري الحذف..." : "حذف"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { PropertyDialog } from "@/components/dashboard/PropertyDialog";
@@ -37,100 +37,77 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PropertiesPage() {
+  const { toast } = useToast();
   const [filter, setFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const properties = [
-    {
-      id: 1,
-      name: "برج الفيصلية - الرياض",
-      location: "الرياض، حي الملقا",
-      units: 24,
-      occupied: 18,
-      available: 6,
-      revenue: "﷼ 456,000",
-      occupancy: 75,
-      status: "active",
-      type: "فندقية",
-      image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800"
-    },
-    {
-      id: 2,
-      name: "أجنحة النخيل الفاخرة",
-      location: "جدة، الكورنيش",
-      image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800",
-      units: 16,
-      occupied: 14,
-      revenue: "﷼ 192,300",
-      occupancy: 88,
-      status: "active",
-      type: "سكنية"
-    },
-    {
-      id: 3,
-      name: "فلل الواحة",
-      location: "الدمام، حي الشاطئ",
-      image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
-      units: 8,
-      occupied: 6,
-      revenue: "﷼ 156,800",
-      occupancy: 75,
-      status: "active",
-      type: "فلل"
-    },
-    {
-      id: 4,
-      name: "شاليهات البحر الأحمر",
-      location: "جدة، أبحر الشمالية",
-      image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800",
-      units: 12,
-      occupied: 8,
-      revenue: "﷼ 128,400",
-      occupancy: 67,
-      status: "active",
-      type: "شاليهات"
-    },
-    {
-      id: 5,
-      name: "مجمع الياسمين السكني",
-      location: "الخبر، الكورنيش",
-      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
-      units: 32,
-      occupied: 28,
-      revenue: "﷼ 358,200",
-      occupancy: 88,
-      status: "active",
-      type: "سكنية"
-    },
-    {
-      id: 6,
-      name: "أبراج المرجان",
-      location: "الرياض، حي السليمانية",
-      image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800",
-      units: 18,
-      occupied: 12,
-      revenue: "﷼ 168,900",
-      occupancy: 67,
-      status: "maintenance",
-      type: "فندقية"
-    },
-  ];
+  // Fetch properties from Supabase
+  const fetchProperties = async () => {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching properties:", error);
+      toast({
+        title: "❌ خطأ في تحميل البيانات",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setProperties(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
 
   const handleDelete = (property: any) => {
     setSelectedProperty(property);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Deleting property:", selectedProperty);
-    setDeleteDialogOpen(false);
-    setSelectedProperty(null);
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("properties")
+        .delete()
+        .eq("id", selectedProperty.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم الحذف بنجاح",
+        description: `تم حذف "${selectedProperty.name_ar || selectedProperty.name}" من قائمة العقارات`,
+      });
+
+      // Refresh list
+      await fetchProperties();
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "❌ فشل الحذف",
+        description: error.message || "حدث خطأ أثناء حذف العقار",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setSelectedProperty(null);
+    }
   };
 
   const handleView = (property: any) => {
@@ -141,6 +118,10 @@ export default function PropertiesPage() {
   const handleEdit = (property: any) => {
     setSelectedProperty(property);
     setEditDialogOpen(true);
+  };
+
+  const handleSuccess = () => {
+    fetchProperties();
   };
 
   return (
@@ -337,16 +318,17 @@ export default function PropertiesPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
               <AlertDialogDescription>
-                سيتم حذف العقار "{selectedProperty?.name}" نهائياً. هذا الإجراء لا يمكن التراجع عنه.
+                سيتم حذف العقار "{selectedProperty?.name_ar || selectedProperty?.name}" نهائياً. هذا الإجراء لا يمكن التراجع عنه.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
               <AlertDialogAction
                 onClick={confirmDelete}
+                disabled={isDeleting}
                 className="bg-destructive hover:bg-destructive/90"
               >
-                حذف
+                {isDeleting ? "جاري الحذف..." : "حذف"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
