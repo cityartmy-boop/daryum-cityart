@@ -95,10 +95,19 @@ export function HousekeepingDialog({ open, onOpenChange, mode, task, onSuccess }
         throw new Error("يرجى ملء جميع الحقول المطلوبة");
       }
 
+      // Get property_id from selected unit
+      const selectedUnit = units.find(u => u.id === formData.unit_id);
+      const property_id = selectedUnit?.properties?.id || selectedUnit?.property_id;
+
+      const payload = {
+        ...formData,
+        property_id: property_id || formData.unit_id // fallback if needed
+      };
+
       if (mode === "add") {
         const { error } = await supabase
           .from("housekeeping_tasks")
-          .insert([formData]);
+          .insert([payload]);
 
         if (error) throw error;
 
@@ -109,7 +118,7 @@ export function HousekeepingDialog({ open, onOpenChange, mode, task, onSuccess }
       } else if (mode === "edit") {
         const { error } = await supabase
           .from("housekeeping_tasks")
-          .update(formData)
+          .update(payload)
           .eq("id", task.id);
 
         if (error) throw error;

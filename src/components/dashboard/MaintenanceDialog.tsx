@@ -39,10 +39,11 @@ export function MaintenanceDialog({ open, onOpenChange, mode, ticket, onSuccess 
     assigned_to: "",
     title: "",
     description: "",
-    severity: "medium",
+    severity: "medium", // this might need to be priority instead of severity based on DB
     status: "open",
     estimated_cost: 0,
     actual_cost: 0,
+    category: "general", // added
   });
 
   useEffect(() => {
@@ -66,10 +67,11 @@ export function MaintenanceDialog({ open, onOpenChange, mode, ticket, onSuccess 
         assigned_to: ticket.assigned_to || "",
         title: ticket.title || "",
         description: ticket.description || "",
-        severity: ticket.severity || "medium",
+        severity: ticket.priority || ticket.severity || "medium",
         status: ticket.status || "open",
         estimated_cost: ticket.estimated_cost || 0,
         actual_cost: ticket.actual_cost || 0,
+        category: ticket.category || "general",
       });
     } else if (mode === "add") {
       setFormData({
@@ -81,6 +83,7 @@ export function MaintenanceDialog({ open, onOpenChange, mode, ticket, onSuccess 
         status: "open",
         estimated_cost: 0,
         actual_cost: 0,
+        category: "general",
       });
     }
   }, [ticket, mode, open]);
@@ -94,10 +97,27 @@ export function MaintenanceDialog({ open, onOpenChange, mode, ticket, onSuccess 
         throw new Error("يرجى ملء جميع الحقول المطلوبة");
       }
 
+      // Get property_id from selected unit
+      const selectedUnit = units.find(u => u.id === formData.unit_id);
+      const property_id = selectedUnit?.properties?.id || selectedUnit?.property_id;
+
+      // Rename severity to priority for DB
+      const { severity, ...restFormData } = formData;
+      const payload = {
+        ...restFormData,
+        priority: severity,
+        property_id: property_id || formData.unit_id,
+      };
+
       if (mode === "add") {
+        const insertPayload = {
+          ...payload,
+          ticket_number: `TKT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        };
+
         const { error } = await supabase
           .from("maintenance_tickets")
-          .insert([formData]);
+          .insert([insertPayload]);
 
         if (error) throw error;
 
@@ -108,7 +128,7 @@ export function MaintenanceDialog({ open, onOpenChange, mode, ticket, onSuccess 
       } else if (mode === "edit") {
         const { error } = await supabase
           .from("maintenance_tickets")
-          .update(formData)
+          .update(payload)
           .eq("id", ticket.id);
 
         if (error) throw error;
