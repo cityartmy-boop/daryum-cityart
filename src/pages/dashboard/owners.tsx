@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
@@ -22,73 +22,95 @@ import {
   FileText,
   Calendar
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function OwnersPage() {
+  const { toast } = useToast();
   const [filter, setFilter] = useState("all");
+  const [owners, setOwners] = useState<any[]>([]);
+  const [statements, setStatements] = useState<any[]>([]);
+
+  // Fetch owners (users with role='owner')
+  const fetchOwners = async () => {
+    const { data, error } = await supabase
+      .from("users")
+      .select(`
+        *,
+        properties:properties!owner_id (
+          id,
+          name,
+          name_ar
+        )
+      `)
+      .eq("role", "owner")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching owners:", error);
+      toast({
+        title: "❌ خطأ في تحميل البيانات",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setOwners(data || []);
+    }
+  };
+
+  // Fetch owner statements
+  const fetchStatements = async () => {
+    const { data, error } = await supabase
+      .from("owner_statements")
+      .select(`
+        *,
+        users:owner_id (
+          full_name,
+          email
+        )
+      `)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      console.error("Error fetching statements:", error);
+    } else {
+      setStatements(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchOwners();
+    fetchStatements();
+  }, []);
+
+  const filteredOwners = owners.filter(owner => {
+    if (filter === "all") return true;
+    if (filter === "active") return owner.status === "active";
+    if (filter === "inactive") return owner.status === "inactive";
+    return true;
+  });
 
   const stats = [
-    { label: "إجمالي الملاك", value: "12", color: "from-primary to-secondary" },
-    { label: "إجمالي العقارات", value: "24", color: "from-blue-500 to-cyan-500" },
-    { label: "الإيرادات الشهرية", value: "﷼ 1.86M", color: "from-emerald-500 to-green-500" },
-    { label: "المستحقات المعلقة", value: "﷼ 126K", color: "from-amber-500 to-orange-500" },
-  ];
-
-  const owners = [
-    {
-      id: 1,
-      name: "أحمد المالكي",
-      email: "ahmed.malki@email.com",
-      phone: "+966 50 123 4567",
-      properties: 3,
-      units: 12,
-      revenue: "﷼ 286,500",
-      due: "﷼ 0",
-      lastPayout: "2026-05-01",
-      status: "active"
-    },
-    {
-      id: 2,
-      name: "فاطمة العتيبي",
-      email: "fatimah.otaibi@email.com",
-      phone: "+966 55 234 5678",
-      properties: 2,
-      units: 8,
-      revenue: "﷼ 192,800",
-      due: "﷼ 38,560",
-      lastPayout: "2026-04-28",
-      status: "active"
-    },
-    {
-      id: 3,
-      name: "خالد السعيد",
-      email: "khaled.saeed@email.com",
-      phone: "+966 50 345 6789",
-      properties: 4,
-      units: 18,
-      revenue: "﷼ 458,200",
-      due: "﷼ 87,340",
-      lastPayout: "2026-04-25",
-      status: "pending"
-    },
-    {
-      id: 4,
-      name: "نورة الدوسري",
-      email: "noura.dosari@email.com",
-      phone: "+966 55 456 7890",
-      properties: 1,
-      units: 4,
-      revenue: "﷼ 98,400",
-      due: "﷼ 0",
-      lastPayout: "2026-05-05",
-      status: "active"
-    },
+    { label: "إجمالي الملاك", value: owners.length, color: "from-primary to-secondary" },
+    { label: "إجمالي العقارات", value: owners.reduce((sum, o) => sum + (o.properties?.length || 0), 0), color: "from-blue-500 to-cyan-500" },
+    { label: "الملاك النشطين", value: owners.filter(o => o.status === "active").length, color: "from-emerald-500 to-green-500" },
+    { label: "الكشوفات المعلقة", value: statements.filter(s => s.status === "draft" || s.status === "sent").length, color: "from-amber-500 to-orange-500" },
   ];
 
   const getStatusBadge = (status: string) => {
     switch(status) {
       case "active": return <Badge className="bg-available">نشط</Badge>;
-      case "pending": return <Badge className="bg-amber-500">معلق</Badge>;
       case "inactive": return <Badge variant="outline">غير نشط</Badge>;
+      default: return <Badge variant="outline">غير معروف</Badge>;
+    }
+  };
+
+  const getStatementStatusBadge = (status: string) => {
+    switch(status) {
+      case "paid": return <Badge className="bg-available">مسدد</Badge>;
+      case "sent": return <Badge className="bg-blue-500">مرسل</Badge>;
+      case "draft": return <Badge className="bg-amber-500">مسودة</Badge>;
       default: return <Badge variant="outline">غير معروف</Badge>;
     }
   };
@@ -146,7 +168,6 @@ export default function OwnersPage() {
                 <SelectContent>
                   <SelectItem value="all">كل الملاك</SelectItem>
                   <SelectItem value="active">نشط</SelectItem>
-                  <SelectItem value="pending">معلق</SelectItem>
                   <SelectItem value="inactive">غير نشط</SelectItem>
                 </SelectContent>
               </Select>
@@ -162,48 +183,41 @@ export default function OwnersPage() {
                     <th className="p-4 font-bold text-foreground">المالك</th>
                     <th className="p-4 font-bold text-foreground">معلومات الاتصال</th>
                     <th className="p-4 font-bold text-foreground">العقارات</th>
-                    <th className="p-4 font-bold text-foreground">الوحدات</th>
-                    <th className="p-4 font-bold text-foreground">الإيراد الشهري</th>
-                    <th className="p-4 font-bold text-foreground">المستحق</th>
-                    <th className="p-4 font-bold text-foreground">آخر دفعة</th>
                     <th className="p-4 font-bold text-foreground">الحالة</th>
                     <th className="p-4 font-bold text-foreground">إجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {owners.map((owner) => (
+                  {filteredOwners.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                        لا يوجد ملاك مسجلين حالياً
+                      </td>
+                    </tr>
+                  )}
+                  {filteredOwners.map((owner) => (
                     <tr key={owner.id} className="border-t border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                            {owner.name.charAt(0)}
+                            {owner.full_name?.charAt(0) || 'M'}
                           </div>
                           <div>
-                            <div className="font-semibold text-foreground">{owner.name}</div>
-                            <div className="text-xs text-muted-foreground">#{owner.id}</div>
+                            <div className="font-semibold text-foreground">{owner.full_name || 'مالك'}</div>
+                            <div className="text-xs text-muted-foreground">#{owner.id.substring(0,8)}</div>
                           </div>
                         </div>
                       </td>
                       <td className="p-4">
                         <div className="text-sm text-foreground">{owner.email}</div>
-                        <div className="text-xs text-muted-foreground">{owner.phone}</div>
+                        <div className="text-xs text-muted-foreground">{owner.phone || 'لا يوجد'}</div>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <Building2 className="w-4 h-4 text-primary" />
-                          <span className="font-semibold text-foreground">{owner.properties}</span>
+                          <span className="font-semibold text-foreground">{owner.properties?.length || 0}</span>
                         </div>
                       </td>
-                      <td className="p-4 font-semibold text-foreground">{owner.units}</td>
-                      <td className="p-4 font-bold text-primary tabular-nums">{owner.revenue}</td>
-                      <td className="p-4">
-                        {owner.due === "﷼ 0" ? (
-                          <Badge className="bg-available">مسدد</Badge>
-                        ) : (
-                          <span className="font-bold text-amber-500 tabular-nums">{owner.due}</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-muted-foreground">{owner.lastPayout}</td>
                       <td className="p-4">{getStatusBadge(owner.status)}</td>
                       <td className="p-4">
                         <div className="flex gap-2">
@@ -224,37 +238,36 @@ export default function OwnersPage() {
             </div>
           </div>
 
-          {/* Recent Payouts */}
+          {/* Recent Statements */}
           <div className="glass rounded-xl p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground">آخر الدفعات</h3>
+              <h3 className="text-xl font-bold text-foreground">آخر الكشوفات</h3>
               <Button variant="outline" size="sm">
                 عرض الكل
               </Button>
             </div>
             <div className="space-y-4">
-              {[
-                { owner: "أحمد المالكي", amount: "﷼ 57,300", date: "2026-05-01", status: "completed" },
-                { owner: "نورة الدوسري", amount: "﷼ 19,680", date: "2026-05-05", status: "completed" },
-                { owner: "فاطمة العتيبي", amount: "﷼ 38,560", date: "2026-04-28", status: "pending" },
-              ].map((payout, index) => (
-                <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+              {statements.length === 0 && (
+                <div className="text-center text-muted-foreground py-6">
+                  لا توجد كشوفات مالية بعد
+                </div>
+              )}
+              {statements.map((statement) => (
+                <div key={statement.id} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <DollarSign className="w-5 h-5 text-primary" />
+                      <FileText className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="font-semibold text-foreground">{payout.owner}</div>
-                      <div className="text-sm text-muted-foreground">{payout.date}</div>
+                      <div className="font-semibold text-foreground">{statement.users?.full_name || 'مالك'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {statement.period_start} إلى {statement.period_end}
+                      </div>
                     </div>
                   </div>
                   <div className="text-left">
-                    <div className="font-bold text-foreground tabular-nums">{payout.amount}</div>
-                    {payout.status === "completed" ? (
-                      <Badge className="bg-available mt-1">مكتمل</Badge>
-                    ) : (
-                      <Badge className="bg-amber-500 mt-1">معلق</Badge>
-                    )}
+                    <div className="font-bold text-foreground tabular-nums">﷼{statement.net_payout}</div>
+                    {getStatementStatusBadge(statement.status)}
                   </div>
                 </div>
               ))}

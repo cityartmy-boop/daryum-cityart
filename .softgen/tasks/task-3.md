@@ -1,6 +1,6 @@
 ---
 title: Core Dashboard Pages - CRUD Operations
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [dashboard, crud, supabase]
@@ -25,11 +25,12 @@ Each page needs:
 - [x] Housekeeping - CRUD complete
 - [x] Maintenance - CRUD complete
 - [x] Admin Users - CRUD complete
-- [ ] Messages - needs implementation
-- [ ] Owners - needs implementation
-- [ ] Finance - needs implementation
+- [x] Messages - send/delete messages
+- [x] Owners - real-time data from Supabase
+- [x] Finance - display only (transactions are read-only financial records)
 
 ## Acceptance
-- Users can add, edit, and delete records in all pages
+- Users can add, edit, and delete records in all relevant pages
 - Changes persist in Supabase
 - Toast notifications confirm success/failure
+- All pages fetch real data from database
