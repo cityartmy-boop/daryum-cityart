@@ -1,40 +1,35 @@
 ---
-title: Executive Dashboard - لوحة التحكم الشاملة
-status: done
-priority: urgent
+title: Core Dashboard Pages - CRUD Operations
+status: in_progress
+priority: high
 type: feature
-tags: [dashboard, analytics, rtl]
+tags: [dashboard, crud, supabase]
 created_by: agent
-created_at: 2026-05-07
+created_at: 2026-05-13
 position: 3
 ---
 
 ## Notes
-Build a comprehensive executive dashboard for Daryum PropTech platform. Must feel like a real property management command center with realistic Saudi market data, RTL layout, and premium visual hierarchy.
-
-Design system: Sky blue + purple gradients, glass-morphism, smooth animations.
+Implement full CRUD (Create, Read, Update, Delete) operations for all core dashboard pages.
+Each page needs:
+- Real-time data fetching from Supabase
+- Add/Edit/View dialogs
+- Delete confirmation
+- Toast notifications
+- Form validation
 
 ## Checklist
-- [x] Create app shell structure (sidebar + header + main content)
-- [x] Build responsive RTL sidebar navigation
-- [x] Create header with search, notifications, user menu
-- [x] Build KPI cards section (8 key metrics with SAR formatting)
-- [x] Implement Revenue Chart component (line/area chart with recharts)
-- [x] Implement Occupancy Trend chart
-- [x] Build Channel Performance bar chart
-- [x] Create Recent Reservations table
-- [x] Build Today's Operations panel
-- [x] Add AI Insights card with recommendations
-- [x] Add smooth transitions and loading states
-- [x] Ensure full RTL support for all elements
-- [x] Test responsive behavior (desktop, tablet, mobile)
-- [x] Install recharts library
-- [x] Check for errors and validate build
+- [x] Properties - CRUD complete
+- [x] Units - CRUD complete
+- [x] Reservations - CRUD complete
+- [x] Housekeeping - CRUD complete
+- [x] Maintenance - CRUD complete
+- [x] Admin Users - CRUD complete
+- [ ] Messages - needs implementation
+- [ ] Owners - needs implementation
+- [ ] Finance - needs implementation
 
 ## Acceptance
-- ✅ Dashboard loads with realistic Saudi property data (SAR currency)
-- ✅ All charts display actual trend data (not placeholders)
-- ✅ Navigation sidebar works smoothly in RTL
-- ✅ Arabic text reads naturally from right to left
-- ✅ KPIs show real metrics (occupancy %, revenue, ADR, etc.)
-- ✅ Build passes with no errors
+- Users can add, edit, and delete records in all pages
+- Changes persist in Supabase
+- Toast notifications confirm success/failure

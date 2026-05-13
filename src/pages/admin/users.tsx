@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -39,104 +39,91 @@ import {
   Download,
   UserCog,
   User,
-  Eye
+  Eye,
+  Loader2
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminUsersPage() {
+  const { toast } = useToast();
   const [filter, setFilter] = useState("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    role: "property_manager",
+    company: "",
+    status: "active",
+  });
 
-  const users = [
-    {
-      id: 1,
-      name: "أحمد السعيد",
-      email: "ahmed.saeed@daryum.sa",
-      phone: "+966 50 123 4567",
-      role: "Admin",
-      workspace: "داريوم الرياض",
-      properties: 24,
-      status: "active",
-      joinedAt: "2026-01-15",
-      lastActive: "2026-05-08"
-    },
-    {
-      id: 2,
-      name: "فاطمة المالكي",
-      email: "fatimah.malki@daryum.sa",
-      phone: "+966 55 234 5678",
-      role: "Property Manager",
-      workspace: "مجموعة النخيل",
-      properties: 16,
-      status: "active",
-      joinedAt: "2026-02-20",
-      lastActive: "2026-05-07"
-    },
-    {
-      id: 3,
-      name: "خالد العتيبي",
-      email: "khaled.otaibi@daryum.sa",
-      phone: "+966 50 345 6789",
-      role: "Accountant",
-      workspace: "عقارات الواحة",
-      properties: 8,
-      status: "active",
-      joinedAt: "2026-03-10",
-      lastActive: "2026-05-08"
-    },
-    {
-      id: 4,
-      name: "نورة الدوسري",
-      email: "noura.dosari@daryum.sa",
-      phone: "+966 55 456 7890",
-      role: "Owner",
-      workspace: "فلل الدوسري",
-      properties: 4,
-      status: "inactive",
-      joinedAt: "2026-01-28",
-      lastActive: "2026-04-15"
-    },
-    {
-      id: 5,
-      name: "سارة القحطاني",
-      email: "sarah.qahtani@daryum.sa",
-      phone: "+966 50 567 8901",
-      role: "Housekeeping Supervisor",
-      workspace: "داريوم جدة",
-      properties: 12,
-      status: "active",
-      joinedAt: "2026-02-05",
-      lastActive: "2026-05-08"
-    },
-  ];
+  const fetchUsers = async () => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching users:", error);
+      toast({
+        title: "❌ خطأ في تحميل البيانات",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setUsers(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const stats = [
-    { label: "إجمالي المستخدمين", value: "248", color: "from-primary to-secondary" },
-    { label: "المستخدمين النشطين", value: "186", color: "from-emerald-500 to-green-500" },
-    { label: "مستخدمين جدد (30 يوم)", value: "23", color: "from-blue-500 to-cyan-500" },
-    { label: "متوسط النشاط اليومي", value: "142", color: "from-amber-500 to-orange-500" },
+    { label: "إجمالي المستخدمين", value: users.length, color: "from-primary to-secondary" },
+    { label: "المستخدمين النشطين", value: users.filter(u => u.status === "active").length, color: "from-emerald-500 to-green-500" },
+    { label: "المدراء", value: users.filter(u => u.role === "admin").length, color: "from-blue-500 to-cyan-500" },
+    { label: "مدراء العقارات", value: users.filter(u => u.role === "property_manager").length, color: "from-amber-500 to-orange-500" },
   ];
 
   const filteredUsers = users.filter(user => {
     if (filter === "all") return true;
     if (filter === "active") return user.status === "active";
     if (filter === "inactive") return user.status === "inactive";
-    return user.role.toLowerCase().includes(filter);
+    return user.role === filter;
   });
 
   const getRoleBadgeColor = (role: string) => {
     const colors: { [key: string]: string } = {
-      "Admin": "bg-primary",
-      "Property Manager": "bg-blue-500",
-      "Owner": "bg-emerald-500",
-      "Accountant": "bg-amber-500",
-      "Housekeeping Supervisor": "bg-teal-500",
-      "Cleaner": "bg-purple-500",
-      "Maintenance": "bg-orange-500",
+      "admin": "bg-primary",
+      "property_manager": "bg-blue-500",
+      "owner": "bg-emerald-500",
+      "accountant": "bg-amber-500",
+      "housekeeping_supervisor": "bg-teal-500",
+      "cleaner": "bg-purple-500",
+      "maintenance": "bg-orange-500",
     };
     return colors[role] || "bg-gray-500";
+  };
+
+  const getRoleLabel = (role: string) => {
+    const labels: { [key: string]: string } = {
+      "admin": "مدير النظام",
+      "property_manager": "مدير عقارات",
+      "owner": "مالك",
+      "accountant": "محاسب",
+      "housekeeping_supervisor": "مشرف تنظيف",
+      "cleaner": "عامل نظافة",
+      "maintenance": "صيانة",
+    };
+    return labels[role] || role;
   };
 
   const handleView = (user: any) => {
@@ -145,6 +132,14 @@ export default function AdminUsersPage() {
 
   const handleEdit = (user: any) => {
     setSelectedUser(user);
+    setFormData({
+      full_name: user.full_name,
+      email: user.email,
+      phone: user.phone || "",
+      role: user.role,
+      company: user.company || "",
+      status: user.status,
+    });
     setEditDialogOpen(true);
   };
 
@@ -153,25 +148,107 @@ export default function AdminUsersPage() {
     setDeleteDialogOpen(true);
   };
 
-  const getRoleBadge = (role: string) => {
-    const colors: { [key: string]: string } = {
-      "Admin": "bg-primary",
-      "Property Manager": "bg-blue-500",
-      "Owner": "bg-emerald-500",
-      "Accountant": "bg-amber-500",
-      "Housekeeping Supervisor": "bg-teal-500",
-      "Cleaner": "bg-purple-500",
-      "Maintenance": "bg-orange-500",
-    };
-    return <Badge className={colors[role] || "bg-gray-500"}>{role}</Badge>;
+  const handleAddUser = async () => {
+    setIsLoading(true);
+    try {
+      if (!formData.full_name || !formData.email) {
+        throw new Error("يرجى ملء جميع الحقول المطلوبة");
+      }
+
+      const { error } = await supabase
+        .from("users")
+        .insert([formData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم إضافة المستخدم بنجاح",
+        description: `تم إضافة "${formData.full_name}" إلى النظام`,
+      });
+
+      setAddDialogOpen(false);
+      setFormData({
+        full_name: "",
+        email: "",
+        phone: "",
+        role: "property_manager",
+        company: "",
+        status: "active",
+      });
+      await fetchUsers();
+    } catch (error: any) {
+      console.error("Add error:", error);
+      toast({
+        title: "❌ فشل الإضافة",
+        description: error.message || "حدث خطأ أثناء إضافة المستخدم",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getStatusBadge = (status: string) => {
-    return status === "active" ? (
-      <Badge className="bg-available">نشط</Badge>
-    ) : (
-      <Badge variant="outline">غير نشط</Badge>
-    );
+  const handleUpdateUser = async () => {
+    setIsLoading(true);
+    try {
+      if (!formData.full_name || !formData.email) {
+        throw new Error("يرجى ملء جميع الحقول المطلوبة");
+      }
+
+      const { error } = await supabase
+        .from("users")
+        .update(formData)
+        .eq("id", selectedUser.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم تحديث المستخدم بنجاح",
+        description: `تم تحديث بيانات "${formData.full_name}"`,
+      });
+
+      setEditDialogOpen(false);
+      await fetchUsers();
+    } catch (error: any) {
+      console.error("Update error:", error);
+      toast({
+        title: "❌ فشل التحديث",
+        description: error.message || "حدث خطأ أثناء تحديث المستخدم",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("users")
+        .delete()
+        .eq("id", selectedUser.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم الحذف بنجاح",
+        description: `تم حذف "${selectedUser.full_name}" من النظام`,
+      });
+
+      await fetchUsers();
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "❌ فشل الحذف",
+        description: error.message || "حدث خطأ أثناء حذف المستخدم",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setSelectedUser(null);
+    }
   };
 
   return (
@@ -185,16 +262,10 @@ export default function AdminUsersPage() {
               <h1 className="text-3xl font-black text-foreground">إدارة المستخدمين</h1>
               <p className="text-muted-foreground">عرض وإدارة جميع مستخدمي النظام</p>
             </div>
-            <div className="flex gap-3">
-              <Button variant="outline">
-                <Download className="w-5 h-5 ml-2" />
-                تصدير
-              </Button>
-              <Button className="gradient-primary" onClick={() => setAddDialogOpen(true)}>
-                <Plus className="w-5 h-5 ml-2" />
-                إضافة مستخدم
-              </Button>
-            </div>
+            <Button className="gradient-primary" onClick={() => setAddDialogOpen(true)}>
+              <Plus className="w-5 h-5 ml-2" />
+              إضافة مستخدم
+            </Button>
           </div>
 
           {/* KPIs */}
@@ -229,9 +300,9 @@ export default function AdminUsersPage() {
                   <SelectItem value="all">كل المستخدمين</SelectItem>
                   <SelectItem value="active">نشط</SelectItem>
                   <SelectItem value="inactive">غير نشط</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="manager">Property Manager</SelectItem>
-                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="admin">مدير النظام</SelectItem>
+                  <SelectItem value="property_manager">مدير عقارات</SelectItem>
+                  <SelectItem value="owner">مالك</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -246,7 +317,6 @@ export default function AdminUsersPage() {
                     <th className="p-4 font-bold text-foreground">الاسم</th>
                     <th className="p-4 font-bold text-foreground">البريد الإلكتروني</th>
                     <th className="p-4 font-bold text-foreground">الدور</th>
-                    <th className="p-4 font-bold text-foreground">تاريخ الانضمام</th>
                     <th className="p-4 font-bold text-foreground">الحالة</th>
                     <th className="p-4 font-bold text-foreground text-center">الإجراءات</th>
                   </tr>
@@ -260,16 +330,15 @@ export default function AdminUsersPage() {
                             <User className="w-5 h-5 text-primary" />
                           </div>
                           <div className="text-right">
-                            <div className="font-semibold text-foreground">{user.name}</div>
-                            <div className="text-xs text-muted-foreground">{user.id}</div>
+                            <div className="font-semibold text-foreground">{user.full_name}</div>
+                            <div className="text-xs text-muted-foreground">{user.phone || 'لا يوجد'}</div>
                           </div>
                         </div>
                       </td>
                       <td className="p-4 text-muted-foreground text-right">{user.email}</td>
                       <td className="p-4 text-right">
-                        <Badge className={getRoleBadgeColor(user.role)}>{user.role}</Badge>
+                        <Badge className={getRoleBadgeColor(user.role)}>{getRoleLabel(user.role)}</Badge>
                       </td>
-                      <td className="p-4 text-muted-foreground text-right">{user.joinedAt}</td>
                       <td className="p-4 text-right">
                         {user.status === "active" ? (
                           <Badge className="bg-available">نشط</Badge>
@@ -279,9 +348,6 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center justify-center gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleView(user)}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
                           <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -307,46 +373,85 @@ export default function AdminUsersPage() {
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">الاسم الكامل</Label>
-                <Input id="name" placeholder="أحمد السعيد" />
+                <Label htmlFor="name">الاسم الكامل *</Label>
+                <Input 
+                  id="name" 
+                  placeholder="أحمد السعيد" 
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input id="email" type="email" placeholder="ahmed@daryum.sa" />
+                <Label htmlFor="email">البريد الإلكتروني *</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="ahmed@daryum.sa" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">رقم الجوال</Label>
-                <Input id="phone" placeholder="+966 50 123 4567" />
+                <Input 
+                  id="phone" 
+                  placeholder="+966 50 123 4567" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">الدور</Label>
-                <Select>
+                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر الدور" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="manager">Property Manager</SelectItem>
-                    <SelectItem value="owner">Owner</SelectItem>
-                    <SelectItem value="accountant">Accountant</SelectItem>
+                    <SelectItem value="admin">مدير النظام</SelectItem>
+                    <SelectItem value="property_manager">مدير عقارات</SelectItem>
+                    <SelectItem value="owner">مالك</SelectItem>
+                    <SelectItem value="accountant">محاسب</SelectItem>
+                    <SelectItem value="housekeeping_supervisor">مشرف تنظيف</SelectItem>
+                    <SelectItem value="cleaner">عامل نظافة</SelectItem>
+                    <SelectItem value="maintenance">صيانة</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="workspace">المساحة</Label>
-                <Input id="workspace" placeholder="داريوم الرياض" />
+                <Label htmlFor="company">الشركة</Label>
+                <Input 
+                  id="company" 
+                  placeholder="داريوم الرياض" 
+                  value={formData.company}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">كلمة المرور</Label>
-                <Input id="password" type="password" placeholder="••••••••" />
+                <Label htmlFor="status">الحالة</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">نشط</SelectItem>
+                    <SelectItem value="inactive">غير نشط</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setAddDialogOpen(false)} disabled={isLoading}>
                 إلغاء
               </Button>
-              <Button className="gradient-primary" onClick={() => setAddDialogOpen(false)}>
-                إضافة المستخدم
+              <Button className="gradient-primary" onClick={handleAddUser} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                    جاري الإضافة...
+                  </>
+                ) : (
+                  "إضافة المستخدم"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -361,38 +466,61 @@ export default function AdminUsersPage() {
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-name">الاسم الكامل</Label>
-                <Input id="edit-name" defaultValue={selectedUser?.name} />
+                <Label htmlFor="edit-name">الاسم الكامل *</Label>
+                <Input 
+                  id="edit-name" 
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-email">البريد الإلكتروني</Label>
-                <Input id="edit-email" type="email" defaultValue={selectedUser?.email} />
+                <Label htmlFor="edit-email">البريد الإلكتروني *</Label>
+                <Input 
+                  id="edit-email" 
+                  type="email" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-phone">رقم الجوال</Label>
-                <Input id="edit-phone" defaultValue={selectedUser?.phone} />
+                <Input 
+                  id="edit-phone" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-role">الدور</Label>
-                <Select defaultValue={selectedUser?.role}>
+                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Property Manager">Property Manager</SelectItem>
-                    <SelectItem value="Owner">Owner</SelectItem>
-                    <SelectItem value="Accountant">Accountant</SelectItem>
+                    <SelectItem value="admin">مدير النظام</SelectItem>
+                    <SelectItem value="property_manager">مدير عقارات</SelectItem>
+                    <SelectItem value="owner">مالك</SelectItem>
+                    <SelectItem value="accountant">محاسب</SelectItem>
+                    <SelectItem value="housekeeping_supervisor">مشرف تنظيف</SelectItem>
+                    <SelectItem value="cleaner">عامل نظافة</SelectItem>
+                    <SelectItem value="maintenance">صيانة</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isLoading}>
                 إلغاء
               </Button>
-              <Button className="gradient-primary" onClick={() => setEditDialogOpen(false)}>
-                حفظ التغييرات
+              <Button className="gradient-primary" onClick={handleUpdateUser} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                    جاري الحفظ...
+                  </>
+                ) : (
+                  "حفظ التغييرات"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -404,16 +532,17 @@ export default function AdminUsersPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
               <AlertDialogDescription>
-                سيتم حذف المستخدم "{selectedUser?.name}" نهائياً من النظام. هذا الإجراء لا يمكن التراجع عنه.
+                سيتم حذف المستخدم "{selectedUser?.full_name}" نهائياً من النظام. هذا الإجراء لا يمكن التراجع عنه.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive hover:bg-destructive/90"
-                onClick={() => setDeleteDialogOpen(false)}
+                onClick={confirmDelete}
+                disabled={isDeleting}
               >
-                حذف
+                {isDeleting ? "جاري الحذف..." : "حذف"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
