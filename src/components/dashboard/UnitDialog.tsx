@@ -43,8 +43,8 @@ export function UnitDialog({ open, onOpenChange, mode, unit, onSuccess }: UnitDi
     bedrooms: 1,
     bathrooms: 1,
     max_guests: 2,
-    area_sqm: 50,
-    base_price: 300,
+    size_sqm: 50,
+    price_per_night: 300,
   });
 
   // Fetch properties for dropdown
@@ -77,8 +77,8 @@ export function UnitDialog({ open, onOpenChange, mode, unit, onSuccess }: UnitDi
         bedrooms: unit.bedrooms || 1,
         bathrooms: unit.bathrooms || 1,
         max_guests: unit.max_guests || 2,
-        area_sqm: unit.area_sqm || 50,
-        base_price: unit.base_price || 300,
+        size_sqm: unit.size_sqm || unit.area_sqm || 50,
+        price_per_night: unit.price_per_night || unit.base_price || 300,
       });
     } else if (mode === "add") {
       setFormData({
@@ -91,8 +91,8 @@ export function UnitDialog({ open, onOpenChange, mode, unit, onSuccess }: UnitDi
         bedrooms: 1,
         bathrooms: 1,
         max_guests: 2,
-        area_sqm: 50,
-        base_price: 300,
+        size_sqm: 50,
+        price_per_night: 300,
       });
     }
   }, [unit, mode, open]);
@@ -298,26 +298,26 @@ export function UnitDialog({ open, onOpenChange, mode, unit, onSuccess }: UnitDi
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="area_sqm">المساحة (م²)</Label>
+                <Label htmlFor="size_sqm">المساحة (م²)</Label>
                 <Input
-                  id="area_sqm"
+                  id="size_sqm"
                   type="number"
                   min="10"
-                  value={formData.area_sqm}
-                  onChange={(e) => setFormData({ ...formData, area_sqm: parseInt(e.target.value) })}
+                  value={formData.size_sqm}
+                  onChange={(e) => setFormData({ ...formData, size_sqm: parseInt(e.target.value) })}
                   disabled={mode === "view"}
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="base_price">السعر (﷼/ليلة) *</Label>
+                <Label htmlFor="price_per_night">السعر (﷼/ليلة) *</Label>
                 <Input
-                  id="base_price"
+                  id="price_per_night"
                   type="number"
                   min="0"
                   step="0.01"
-                  value={formData.base_price}
-                  onChange={(e) => setFormData({ ...formData, base_price: parseFloat(e.target.value) })}
+                  value={formData.price_per_night}
+                  onChange={(e) => setFormData({ ...formData, price_per_night: parseFloat(e.target.value) })}
                   disabled={mode === "view"}
                   required
                 />

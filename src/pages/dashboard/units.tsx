@@ -194,40 +194,44 @@ export default function UnitsPage() {
                 key={unit.id}
                 className="glass rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 border border-border/50 hover:border-primary/30"
               >
-                <div className="relative h-40 overflow-hidden">
-                  <img 
-                    src={unit.image}
-                    alt={unit.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
+                <div className="relative h-40 overflow-hidden bg-muted flex items-center justify-center">
+                  {unit.images && unit.images.length > 0 ? (
+                    <img 
+                      src={unit.images[0]}
+                      alt={unit.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <Home className="w-12 h-12 text-muted-foreground/30" />
+                  )}
                   <div className="absolute top-3 right-3">
                     {getStatusBadge(unit.status)}
                   </div>
                 </div>
 
                 <div className="p-5">
-                  <div className="text-xs text-primary font-semibold mb-1">{unit.property}</div>
+                  <div className="text-xs text-primary font-semibold mb-1">{unit.properties?.name_ar || unit.properties?.name || 'بدون عقار'}</div>
                   <h3 className="text-lg font-bold text-foreground mb-3">{unit.name}</h3>
                   
                   <div className="flex flex-wrap gap-3 mb-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <DoorOpen className="w-4 h-4" />
-                      <span>{unit.type}</span>
+                      <span>{unit.type === 'studio' ? 'استديو' : unit.type === '1br' ? 'غرفة وصالة' : unit.type}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Users className="w-4 h-4" />
-                      <span>{unit.capacity} ضيوف</span>
+                      <span>{unit.max_guests} ضيوف</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <BedDouble className="w-4 h-4" />
-                      <span>{unit.beds} أسرة</span>
+                      <span>{unit.bedrooms} أسرة</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-border/50">
                     <div>
                       <span className="text-xs text-muted-foreground block">السعر في الليلة</span>
-                      <span className="font-bold text-foreground">{unit.price}</span>
+                      <span className="font-bold text-foreground">{unit.price_per_night} ﷼</span>
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleView(unit)}>

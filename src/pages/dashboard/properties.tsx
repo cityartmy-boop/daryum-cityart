@@ -208,18 +208,18 @@ export default function PropertiesPage() {
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
                   <img 
-                    src={property.image}
-                    alt={property.name}
+                    src={property.cover_image || property.image || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80"}
+                    alt={property.name_ar || property.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute top-4 right-4">
                     <Badge variant={property.status === "active" ? "default" : "secondary"}>
-                      {property.status === "active" ? "نشط" : "صيانة"}
+                      {property.status === "active" ? "نشط" : property.status === "maintenance" ? "صيانة" : "غير نشط"}
                     </Badge>
                   </div>
                   <div className="absolute top-4 left-4">
-                    <Badge variant="outline" className="bg-white/90">
-                      {property.type}
+                    <Badge variant="outline" className="bg-white/90 text-black">
+                      {property.type === 'apartment' ? 'شقق سكنية' : property.type === 'villa' ? 'فيلا' : property.type === 'hotel' ? 'فندق' : property.type}
                     </Badge>
                   </div>
                 </div>
@@ -227,30 +227,18 @@ export default function PropertiesPage() {
                 {/* Content */}
                 <div className="p-6">
                   <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {property.name}
+                    {property.name_ar || property.name}
                   </h3>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                     <MapPin className="w-4 h-4" />
-                    <span>{property.location}</span>
+                    <span>{property.address}, {property.city}</span>
                   </div>
 
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-border/50">
                     <div>
                       <div className="text-xs text-muted-foreground mb-1">الوحدات</div>
-                      <div className="text-lg font-bold text-foreground">{property.units}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">مشغولة</div>
-                      <div className="text-lg font-bold text-available">{property.occupied}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">الإشغال</div>
-                      <div className="text-lg font-bold text-primary">{property.occupancy}%</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">الإيراد</div>
-                      <div className="text-sm font-bold text-foreground">{property.revenue}</div>
+                      <div className="text-lg font-bold text-foreground">{property.total_units || 0}</div>
                     </div>
                   </div>
 

@@ -39,7 +39,7 @@ export function PropertyDialog({ open, onOpenChange, mode, property, onSuccess }
     address: "",
     city: "riyadh",
     description: "",
-    image_url: "",
+    cover_image: "",
   });
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export function PropertyDialog({ open, onOpenChange, mode, property, onSuccess }
         address: property.address || property.location || "",
         city: property.city || "riyadh",
         description: property.description || "",
-        image_url: property.image_url || property.image || "",
+        cover_image: property.cover_image || property.image_url || property.image || "",
       });
     } else if (mode === "add") {
       // Reset form for new property
@@ -62,7 +62,7 @@ export function PropertyDialog({ open, onOpenChange, mode, property, onSuccess }
         address: "",
         city: "riyadh",
         description: "",
-        image_url: "",
+        cover_image: "",
       });
     }
   }, [property, mode, open]);
@@ -233,18 +233,18 @@ export function PropertyDialog({ open, onOpenChange, mode, property, onSuccess }
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="image_url">رابط الصورة</Label>
+              <Label htmlFor="cover_image">رابط الصورة</Label>
               <Input
-                id="image_url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                id="cover_image"
+                value={formData.cover_image}
+                onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
                 disabled={mode === "view"}
                 placeholder="https://example.com/image.jpg"
                 dir="ltr"
               />
-              {formData.image_url && (
+              {formData.cover_image && (
                 <img
-                  src={formData.image_url}
+                  src={formData.cover_image}
                   alt="Preview"
                   className="w-full h-32 object-cover rounded-lg mt-2"
                 />
