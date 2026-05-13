@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { ReservationDialog } from "@/components/dashboard/ReservationDialog";
@@ -24,67 +24,59 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Search,
-  Filter,
   Download,
   Plus,
   Eye,
   Pencil,
   Trash2,
-  Calendar,
-  User,
-  MapPin,
-  DollarSign
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ReservationsPage() {
+  const { toast } = useToast();
   const [filter, setFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
+  const [reservations, setReservations] = useState<any[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const reservations = [
-    {
-      id: 1,
-      guestName: "أحمد محمد السعيد",
-      property: "برج الفيصلية",
-      unit: "جناح 101",
-      checkIn: "2026-05-15",
-      checkOut: "2026-05-18",
-      nights: 3,
-      guests: 2,
-      amount: "1,350",
-      status: "confirmed",
-      channel: "airbnb"
-    },
-    {
-      id: 2,
-      guestName: "Sarah Johnson",
-      property: "أجنحة النخيل",
-      unit: "فيلا A1",
-      checkIn: "2026-05-20",
-      checkOut: "2026-05-25",
-      nights: 5,
-      guests: 4,
-      amount: "4,250",
-      status: "pending",
-      channel: "booking"
-    },
-    {
-      id: 3,
-      guestName: "خالد عبدالله",
-      property: "فلل الواحة",
-      unit: "فيلا B3",
-      checkIn: "2026-05-10",
-      checkOut: "2026-05-12",
-      nights: 2,
-      guests: 3,
-      amount: "980",
-      status: "current",
-      channel: "direct"
-    },
-  ];
+  // Fetch reservations from Supabase
+  const fetchReservations = async () => {
+    const { data, error } = await supabase
+      .from("reservations")
+      .select(`
+        *,
+        units (
+          id,
+          name,
+          properties (
+            id,
+            name,
+            name_ar
+          )
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching reservations:", error);
+      toast({
+        title: "❌ خطأ في تحميل البيانات",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setReservations(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchReservations();
+  }, []);
 
   const filteredReservations = filter === "all" 
     ? reservations 
@@ -94,8 +86,8 @@ export default function ReservationsPage() {
     switch(status) {
       case "confirmed": return <Badge className="bg-primary">مؤكد</Badge>;
       case "pending": return <Badge className="bg-amber-500">قيد الانتظار</Badge>;
-      case "current": return <Badge className="bg-blue-500">حالي</Badge>;
-      case "completed": return <Badge className="bg-emerald-500">منتهي</Badge>;
+      case "checked_in": return <Badge className="bg-blue-500">حالي</Badge>;
+      case "checked_out": return <Badge className="bg-emerald-500">منتهي</Badge>;
       case "cancelled": return <Badge variant="destructive">ملغي</Badge>;
       default: return <Badge variant="outline">غير معروف</Badge>;
     }
@@ -106,13 +98,16 @@ export default function ReservationsPage() {
       case "airbnb": return <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">Airbnb</Badge>;
       case "booking": return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Booking.com</Badge>;
       case "direct": return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">مباشر</Badge>;
+      case "agoda": return <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">Agoda</Badge>;
+      case "vrbo": return <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">Vrbo</Badge>;
       default: return <Badge variant="outline">{channel}</Badge>;
     }
   };
 
-  const handleExport = () => {
-    console.log("Exporting reservations...");
-    alert("جارٍ تصدير الحجوزات إلى Excel...");
+  const calculateNights = (checkIn: string, checkOut: string) => {
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   };
 
   const handleView = (reservation: any) => {
@@ -130,10 +125,38 @@ export default function ReservationsPage() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Deleting reservation:", selectedReservation);
-    setDeleteDialogOpen(false);
-    setSelectedReservation(null);
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("reservations")
+        .delete()
+        .eq("id", selectedReservation.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم الحذف بنجاح",
+        description: `تم حذف حجز "${selectedReservation.guest_name}" من قائمة الحجوزات`,
+      });
+
+      await fetchReservations();
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "❌ فشل الحذف",
+        description: error.message || "حدث خطأ أثناء حذف الحجز",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setSelectedReservation(null);
+    }
+  };
+
+  const handleSuccess = () => {
+    fetchReservations();
   };
 
   return (
@@ -262,14 +285,14 @@ export default function ReservationsPage() {
           </div>
         </div>
 
-        {/* Add Reservation Dialog */}
+        {/* Dialogs with onSuccess callback */}
         <ReservationDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           mode="add"
+          onSuccess={handleSuccess}
         />
 
-        {/* View Reservation Dialog */}
         <ReservationDialog
           open={viewDialogOpen}
           onOpenChange={setViewDialogOpen}
@@ -277,12 +300,12 @@ export default function ReservationsPage() {
           reservation={selectedReservation}
         />
 
-        {/* Edit Reservation Dialog */}
         <ReservationDialog
           open={editDialogOpen}
           onOpenChange={setEditDialogOpen}
           mode="edit"
           reservation={selectedReservation}
+          onSuccess={handleSuccess}
         />
 
         {/* Delete Confirmation */}
@@ -291,13 +314,17 @@ export default function ReservationsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
               <AlertDialogDescription>
-                سيتم حذف الحجز للضيف "{selectedReservation?.guestName}" نهائياً.
+                سيتم حذف الحجز للضيف "{selectedReservation?.guest_name}" نهائياً.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDelete} className="bg-destructive">
-                حذف
+              <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete} 
+                disabled={isDeleting}
+                className="bg-destructive"
+              >
+                {isDeleting ? "جاري الحذف..." : "حذف"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
