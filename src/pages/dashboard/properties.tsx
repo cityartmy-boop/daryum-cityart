@@ -282,6 +282,7 @@ export default function PropertiesPage() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           mode="add"
+          onSuccess={handleSuccess}
         />
 
         {/* View Property Dialog */}
@@ -298,6 +299,7 @@ export default function PropertiesPage() {
           onOpenChange={setEditDialogOpen}
           mode="edit"
           property={selectedProperty}
+          onSuccess={handleSuccess}
         />
 
         {/* Delete Confirmation Dialog */}
