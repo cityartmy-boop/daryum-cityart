@@ -90,10 +90,12 @@ export default function MessagesPage() {
         .insert([
           {
             reservation_id: selectedReservationId,
-            sender: "host",
-            content: message,
+            sender_type: "host",
+            sender_name: "مدير العقار",
+            recipient_type: "guest",
+            message: message,
             channel: "platform",
-            is_read: true,
+            status: "sent"
           }
         ]);
 
@@ -241,22 +243,22 @@ export default function MessagesPage() {
                   {messages.map((msg) => (
                     <div
                       key={msg.id}
-                      className={`flex ${msg.sender === "host" ? "justify-start" : "justify-end"}`}
+                      className={`flex ${msg.sender_type === "host" ? "justify-start" : "justify-end"}`}
                     >
                       <div className="flex flex-col">
                         <div className={`max-w-md ${
-                          msg.sender === "host" 
+                          msg.sender_type === "host" 
                             ? "bg-muted/50 text-foreground" 
                             : "gradient-primary text-white"
                         } rounded-2xl px-4 py-3`}>
-                          <div className="text-sm">{msg.content}</div>
+                          <div className="text-sm">{msg.message}</div>
                           <div className={`text-xs mt-1 ${
-                            msg.sender === "host" ? "text-muted-foreground" : "text-white/70"
+                            msg.sender_type === "host" ? "text-muted-foreground" : "text-white/70"
                           }`}>
-                            {new Date(msg.created_at).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(msg.created_at || new Date()).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
-                        {msg.sender === "host" && (
+                        {msg.sender_type === "host" && (
                           <Button
                             variant="ghost"
                             size="sm"
