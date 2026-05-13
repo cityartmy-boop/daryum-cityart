@@ -43,10 +43,9 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
     check_out: "",
     guest_count: 1,
     status: "pending",
-    source: "direct",
+    channel: "direct",
     total_amount: 0,
     paid_amount: 0,
-    payment_status: "pending",
     notes: "",
   });
 
@@ -89,10 +88,9 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
         check_out: reservation.check_out || "",
         guest_count: reservation.guest_count || 1,
         status: reservation.status || "pending",
-        source: reservation.source || "direct",
+        channel: reservation.channel || "direct",
         total_amount: reservation.total_amount || 0,
         paid_amount: reservation.paid_amount || 0,
-        payment_status: reservation.payment_status || "pending",
         notes: reservation.notes || "",
       });
     } else if (mode === "add") {
@@ -106,10 +104,9 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
         check_out: "",
         guest_count: 1,
         status: "pending",
-        source: "direct",
+        channel: "direct",
         total_amount: 0,
         paid_amount: 0,
-        payment_status: "pending",
         notes: "",
       });
     }
@@ -148,10 +145,24 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
         throw new Error("يرجى ملء جميع الحقول المطلوبة");
       }
 
+      const checkIn = new Date(formData.check_in);
+      const checkOut = new Date(formData.check_out);
+      const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (nights <= 0) {
+        throw new Error("تاريخ الخروج يجب أن يكون بعد تاريخ الدخول");
+      }
+
       if (mode === "add") {
+        const payload = {
+          ...formData,
+          nights,
+          reservation_code: `RES-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        };
+
         const { data, error } = await supabase
           .from("reservations")
-          .insert([formData])
+          .insert([payload])
           .select();
 
         if (error) throw error;
@@ -161,9 +172,14 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
           description: `تم إضافة حجز للضيف "${formData.guest_name}"`,
         });
       } else if (mode === "edit") {
+        const payload = {
+          ...formData,
+          nights,
+        };
+
         const { data, error } = await supabase
           .from("reservations")
-          .update(formData)
+          .update(payload)
           .eq("id", reservation.id)
           .select();
 
@@ -319,10 +335,10 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="source">مصدر الحجز</Label>
+                <Label htmlFor="channel">مصدر الحجز</Label>
                 <Select
-                  value={formData.source}
-                  onValueChange={(value) => setFormData({ ...formData, source: value })}
+                  value={formData.channel}
+                  onValueChange={(value) => setFormData({ ...formData, channel: value })}
                   disabled={mode === "view"}
                 >
                   <SelectTrigger>
@@ -331,15 +347,16 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
                   <SelectContent>
                     <SelectItem value="direct">مباشر</SelectItem>
                     <SelectItem value="airbnb">Airbnb</SelectItem>
-                    <SelectItem value="booking">Booking.com</SelectItem>
+                    <SelectItem value="booking_com">Booking.com</SelectItem>
                     <SelectItem value="agoda">Agoda</SelectItem>
                     <SelectItem value="vrbo">Vrbo</SelectItem>
+                    <SelectItem value="expedia">Expedia</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="total_amount">المبلغ الإجمالي (﷼)</Label>
                 <Input
@@ -364,25 +381,6 @@ export function ReservationDialog({ open, onOpenChange, mode, reservation, onSuc
                   onChange={(e) => setFormData({ ...formData, paid_amount: parseFloat(e.target.value) })}
                   disabled={mode === "view"}
                 />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="payment_status">حالة الدفع</Label>
-                <Select
-                  value={formData.payment_status}
-                  onValueChange={(value) => setFormData({ ...formData, payment_status: value })}
-                  disabled={mode === "view"}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">معلق</SelectItem>
-                    <SelectItem value="paid">مدفوع</SelectItem>
-                    <SelectItem value="partial">جزئي</SelectItem>
-                    <SelectItem value="refunded">مسترد</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 

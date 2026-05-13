@@ -159,6 +159,13 @@ export default function ReservationsPage() {
     fetchReservations();
   };
 
+  const handleExport = () => {
+    toast({
+      title: "جاري التصدير...",
+      description: "سيتم تحميل ملف Excel قريباً.",
+    });
+  };
+
   return (
     <>
       <SEO title="الحجوزات - داريوم" />
@@ -229,26 +236,26 @@ export default function ReservationsPage() {
                 <tbody>
                   {filteredReservations.map((reservation) => (
                     <tr key={reservation.id} className="border-t border-border/50 hover:bg-muted/30 transition-colors">
-                      <td className="p-4 text-muted-foreground">{reservation.id}</td>
+                      <td className="p-4 text-muted-foreground">{reservation.reservation_code || reservation.id?.substring(0,8)}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                            {reservation.guestName.charAt(0)}
+                            {reservation.guest_name?.charAt(0) || '?'}
                           </div>
                           <div>
-                            <div className="font-semibold text-foreground">{reservation.guestName}</div>
-                            <div className="text-sm text-muted-foreground">{reservation.guests} ضيف</div>
+                            <div className="font-semibold text-foreground">{reservation.guest_name}</div>
+                            <div className="text-sm text-muted-foreground">{reservation.guest_count} ضيف</div>
                           </div>
                         </div>
                       </td>
                       <td className="p-4">
-                        <div className="font-medium text-foreground">{reservation.property}</div>
-                        <div className="text-sm text-muted-foreground">{reservation.unit}</div>
+                        <div className="font-medium text-foreground">{reservation.units?.properties?.name_ar || reservation.units?.properties?.name || 'غير محدد'}</div>
+                        <div className="text-sm text-muted-foreground">{reservation.units?.name || 'غير محدد'}</div>
                       </td>
-                      <td className="p-4 text-foreground">{reservation.checkIn}</td>
-                      <td className="p-4 text-foreground">{reservation.checkOut}</td>
+                      <td className="p-4 text-foreground">{reservation.check_in}</td>
+                      <td className="p-4 text-foreground">{reservation.check_out}</td>
                       <td className="p-4 text-foreground font-semibold">{reservation.nights}</td>
-                      <td className="p-4 text-foreground font-bold">﷼{reservation.amount}</td>
+                      <td className="p-4 text-foreground font-bold">﷼{reservation.total_amount}</td>
                       <td className="p-4">{getStatusBadge(reservation.status)}</td>
                       <td className="p-4">{getChannelBadge(reservation.channel)}</td>
                       <td className="p-4">
