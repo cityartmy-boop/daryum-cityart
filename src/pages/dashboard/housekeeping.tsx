@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
+import { HousekeepingDialog } from "@/components/dashboard/HousekeepingDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -12,71 +13,76 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Search,
-  Filter,
   Plus,
   CheckCircle2,
   Clock,
-  AlertCircle,
   User,
   Building2,
-  Calendar
+  Calendar,
+  Eye,
+  Pencil,
+  Trash2
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function HousekeepingPage() {
+  const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const tasks = [
-    {
-      id: 1,
-      unit: "جناح 101",
-      property: "برج الفيصلية",
-      type: "تنظيف كامل",
-      status: "pending",
-      assignedTo: "فاطمة أحمد",
-      checkOut: "2026-05-08 11:00",
-      checkIn: "2026-05-08 15:00",
-      priority: "high",
-      estimatedTime: "45 دقيقة"
-    },
-    {
-      id: 2,
-      unit: "فيلا A1",
-      property: "أجنحة النخيل",
-      type: "تنظيف سريع",
-      status: "in_progress",
-      assignedTo: "نورة محمد",
-      checkOut: "2026-05-08 12:00",
-      checkIn: "2026-05-08 14:00",
-      priority: "medium",
-      estimatedTime: "30 دقيقة"
-    },
-    {
-      id: 3,
-      unit: "شقة B2",
-      property: "فلل الواحة",
-      type: "تنظيف كامل",
-      status: "completed",
-      assignedTo: "مريم عبدالله",
-      checkOut: "2026-05-07 11:00",
-      checkIn: "2026-05-07 15:00",
-      priority: "low",
-      estimatedTime: "50 دقيقة",
-      completedAt: "2026-05-07 13:45"
-    },
-    {
-      id: 4,
-      unit: "جناح 205",
-      property: "برج الفيصلية",
-      type: "تنظيف عميق",
-      status: "pending",
-      assignedTo: "سارة خالد",
-      checkOut: "2026-05-08 10:00",
-      checkIn: "2026-05-08 16:00",
-      priority: "high",
-      estimatedTime: "90 دقيقة"
-    },
-  ];
+  const fetchTasks = async () => {
+    const { data, error } = await supabase
+      .from("housekeeping_tasks")
+      .select(`
+        *,
+        units (
+          id,
+          name,
+          properties (
+            name,
+            name_ar
+          )
+        ),
+        users (
+          id,
+          full_name
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching tasks:", error);
+      toast({
+        title: "❌ خطأ في تحميل البيانات",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setTasks(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   const filteredTasks = statusFilter === "all" 
     ? tasks 
@@ -87,25 +93,74 @@ export default function HousekeepingPage() {
       case "pending": return <Badge className="bg-amber-500">قيد الانتظار</Badge>;
       case "in_progress": return <Badge className="bg-blue-500">جارٍ التنفيذ</Badge>;
       case "completed": return <Badge className="bg-available">مكتمل</Badge>;
-      case "delayed": return <Badge variant="destructive">متأخر</Badge>;
       default: return <Badge variant="outline">غير معروف</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     switch(priority) {
-      case "high": return <Badge variant="destructive" className="text-xs">عاجل</Badge>;
-      case "medium": return <Badge className="bg-amber-500 text-xs">متوسط</Badge>;
+      case "urgent": return <Badge variant="destructive" className="text-xs">عاجل</Badge>;
+      case "high": return <Badge className="bg-amber-500 text-xs">عالي</Badge>;
+      case "normal": return <Badge variant="outline" className="text-xs">عادي</Badge>;
       case "low": return <Badge variant="outline" className="text-xs">منخفض</Badge>;
       default: return null;
     }
   };
 
+  const handleView = (task: any) => {
+    setSelectedTask(task);
+    setViewDialogOpen(true);
+  };
+
+  const handleEdit = (task: any) => {
+    setSelectedTask(task);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (task: any) => {
+    setSelectedTask(task);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("housekeeping_tasks")
+        .delete()
+        .eq("id", selectedTask.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم الحذف بنجاح",
+        description: "تم حذف المهمة من قائمة التنظيف",
+      });
+
+      await fetchTasks();
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "❌ فشل الحذف",
+        description: error.message || "حدث خطأ أثناء حذف المهمة",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setSelectedTask(null);
+    }
+  };
+
+  const handleSuccess = () => {
+    fetchTasks();
+  };
+
   const stats = [
-    { label: "المهام المعلقة", value: "2", color: "from-amber-500 to-orange-500" },
-    { label: "قيد التنفيذ", value: "1", color: "from-blue-500 to-cyan-500" },
-    { label: "المكتملة اليوم", value: "1", color: "from-available to-emerald-500" },
-    { label: "متوسط الوقت", value: "42 دقيقة", color: "from-purple-500 to-pink-500" },
+    { label: "المهام المعلقة", value: tasks.filter(t => t.status === "pending").length, color: "from-amber-500 to-orange-500" },
+    { label: "قيد التنفيذ", value: tasks.filter(t => t.status === "in_progress").length, color: "from-blue-500 to-cyan-500" },
+    { label: "المكتملة اليوم", value: tasks.filter(t => t.status === "completed").length, color: "from-available to-emerald-500" },
+    { label: "إجمالي المهام", value: tasks.length, color: "from-purple-500 to-pink-500" },
   ];
 
   return (
@@ -119,7 +174,7 @@ export default function HousekeepingPage() {
               <h1 className="text-3xl font-black text-foreground">التنظيف</h1>
               <p className="text-muted-foreground">إدارة مهام التنظيف والعاملين</p>
             </div>
-            <Button className="gradient-primary">
+            <Button className="gradient-primary" onClick={() => setDialogOpen(true)}>
               <Plus className="w-5 h-5 ml-2" />
               إضافة مهمة جديدة
             </Button>
@@ -157,19 +212,6 @@ export default function HousekeepingPage() {
                   <SelectItem value="pending">قيد الانتظار</SelectItem>
                   <SelectItem value="in_progress">جارٍ التنفيذ</SelectItem>
                   <SelectItem value="completed">مكتمل</SelectItem>
-                  <SelectItem value="delayed">متأخر</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select defaultValue="all">
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="العامل" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل العاملين</SelectItem>
-                  <SelectItem value="fatima">فاطمة أحمد</SelectItem>
-                  <SelectItem value="noura">نورة محمد</SelectItem>
-                  <SelectItem value="maryam">مريم عبدالله</SelectItem>
-                  <SelectItem value="sarah">سارة خالد</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -185,10 +227,10 @@ export default function HousekeepingPage() {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-foreground mb-1">{task.unit}</h3>
+                    <h3 className="text-lg font-bold text-foreground mb-1">{task.units?.name || 'وحدة محذوفة'}</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Building2 className="w-4 h-4" />
-                      <span>{task.property}</span>
+                      <span>{task.units?.properties?.name_ar || task.units?.properties?.name || 'عقار محذوف'}</span>
                     </div>
                   </div>
                   {getPriorityBadge(task.priority)}
@@ -197,7 +239,7 @@ export default function HousekeepingPage() {
                 {/* Task Type */}
                 <div className="mb-4">
                   <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                    {task.type}
+                    {task.task_type === "cleaning" ? "تنظيف عادي" : task.task_type === "deep_clean" ? "تنظيف عميق" : "فحص"}
                   </Badge>
                 </div>
 
@@ -210,45 +252,75 @@ export default function HousekeepingPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2 text-sm">
                     <User className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground">{task.assignedTo}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">الوقت المتوقع: {task.estimatedTime}</span>
+                    <span className="text-foreground">{task.users?.full_name || "لم يُعيّن"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Check-out: {task.checkOut}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Check-in: {task.checkIn}</span>
+                    <span className="text-muted-foreground">{task.scheduled_date} {task.scheduled_time}</span>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-border/50">
-                  {task.status === "pending" && (
-                    <Button size="sm" className="flex-1 gradient-primary">
-                      بدء التنفيذ
-                    </Button>
-                  )}
-                  {task.status === "in_progress" && (
-                    <Button size="sm" className="flex-1 bg-available hover:bg-available/90">
-                      <CheckCircle2 className="w-4 h-4 ml-2" />
-                      إتمام
-                    </Button>
-                  )}
-                  {task.status === "completed" && (
-                    <Button size="sm" variant="outline" className="flex-1">
-                      عرض التفاصيل
-                    </Button>
-                  )}
+                  <Button size="sm" variant="ghost" onClick={() => handleView(task)}>
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleEdit(task)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(task)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Dialogs */}
+        <HousekeepingDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          mode="add"
+          onSuccess={handleSuccess}
+        />
+
+        <HousekeepingDialog
+          open={viewDialogOpen}
+          onOpenChange={setViewDialogOpen}
+          mode="view"
+          task={selectedTask}
+        />
+
+        <HousekeepingDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          mode="edit"
+          task={selectedTask}
+          onSuccess={handleSuccess}
+        />
+
+        {/* Delete Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                سيتم حذف المهمة نهائياً.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete} 
+                disabled={isDeleting}
+                className="bg-destructive"
+              >
+                {isDeleting ? "جاري الحذف..." : "حذف"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </AppShell>
     </>
   );

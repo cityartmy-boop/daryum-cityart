@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
+import { MaintenanceDialog } from "@/components/dashboard/MaintenanceDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -12,75 +13,76 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Search,
   Plus,
   Wrench,
-  AlertTriangle,
   Clock,
   DollarSign,
   User,
   Building2,
-  CheckCircle2
+  Eye,
+  Pencil,
+  Trash2
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MaintenancePage() {
+  const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const tickets = [
-    {
-      id: 1,
-      title: "تسرب مياه في الحمام",
-      unit: "جناح 101",
-      property: "برج الفيصلية",
-      severity: "high",
-      status: "open",
-      assignedTo: "محمد علي",
-      createdAt: "2026-05-08 09:00",
-      estimatedCost: "﷼ 450",
-      sla: "2 ساعات",
-      description: "تسرب مياه من خزان المرحاض الرئيسي"
-    },
-    {
-      id: 2,
-      title: "عطل في مكيف الهواء",
-      unit: "فيلا A1",
-      property: "أجنحة النخيل",
-      severity: "medium",
-      status: "in_progress",
-      assignedTo: "أحمد خالد",
-      createdAt: "2026-05-08 08:00",
-      estimatedCost: "﷼ 850",
-      sla: "4 ساعات",
-      description: "المكيف لا يبرد بشكل كافٍ"
-    },
-    {
-      id: 3,
-      title: "باب خزانة مكسور",
-      unit: "شقة B2",
-      property: "فلل الواحة",
-      severity: "low",
-      status: "completed",
-      assignedTo: "سعيد محمد",
-      createdAt: "2026-05-07 14:00",
-      estimatedCost: "﷼ 250",
-      sla: "24 ساعة",
-      completedAt: "2026-05-07 16:30",
-      description: "باب خزانة غرفة النوم بحاجة لإصلاح"
-    },
-    {
-      id: 4,
-      title: "مشكلة في الكهرباء",
-      unit: "جناح 205",
-      property: "برج الفيصلية",
-      severity: "high",
-      status: "open",
-      assignedTo: null,
-      createdAt: "2026-05-08 10:30",
-      estimatedCost: "﷼ 600",
-      sla: "1 ساعة",
-      description: "انقطاع متقطع في التيار الكهربائي"
-    },
-  ];
+  const fetchTickets = async () => {
+    const { data, error } = await supabase
+      .from("maintenance_tickets")
+      .select(`
+        *,
+        units (
+          id,
+          name,
+          properties (
+            name,
+            name_ar
+          )
+        ),
+        users (
+          id,
+          full_name
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching tickets:", error);
+      toast({
+        title: "❌ خطأ في تحميل البيانات",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setTickets(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
   const filteredTickets = statusFilter === "all" 
     ? tickets 
@@ -88,6 +90,7 @@ export default function MaintenancePage() {
 
   const getSeverityBadge = (severity: string) => {
     switch(severity) {
+      case "critical": return <Badge variant="destructive">حرج</Badge>;
       case "high": return <Badge variant="destructive">عاجل</Badge>;
       case "medium": return <Badge className="bg-amber-500">متوسط</Badge>;
       case "low": return <Badge variant="outline">منخفض</Badge>;
@@ -99,17 +102,66 @@ export default function MaintenancePage() {
     switch(status) {
       case "open": return <Badge className="bg-primary">مفتوح</Badge>;
       case "in_progress": return <Badge className="bg-blue-500">قيد التنفيذ</Badge>;
-      case "completed": return <Badge className="bg-available">مكتمل</Badge>;
-      case "on_hold": return <Badge className="bg-amber-500">معلق</Badge>;
+      case "resolved": return <Badge className="bg-available">تم الحل</Badge>;
+      case "closed": return <Badge variant="outline">مغلق</Badge>;
       default: return <Badge variant="outline">غير معروف</Badge>;
     }
   };
 
+  const handleView = (ticket: any) => {
+    setSelectedTicket(ticket);
+    setViewDialogOpen(true);
+  };
+
+  const handleEdit = (ticket: any) => {
+    setSelectedTicket(ticket);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (ticket: any) => {
+    setSelectedTicket(ticket);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("maintenance_tickets")
+        .delete()
+        .eq("id", selectedTicket.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ تم الحذف بنجاح",
+        description: "تم حذف طلب الصيانة",
+      });
+
+      await fetchTickets();
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "❌ فشل الحذف",
+        description: error.message || "حدث خطأ أثناء حذف الطلب",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setSelectedTicket(null);
+    }
+  };
+
+  const handleSuccess = () => {
+    fetchTickets();
+  };
+
   const stats = [
-    { label: "التذاكر المفتوحة", value: "2", color: "from-primary to-secondary" },
-    { label: "قيد التنفيذ", value: "1", color: "from-blue-500 to-cyan-500" },
-    { label: "المكتملة اليوم", value: "1", color: "from-available to-emerald-500" },
-    { label: "إجمالي التكاليف", value: "﷼ 2,150", color: "from-amber-500 to-orange-500" },
+    { label: "التذاكر المفتوحة", value: tickets.filter(t => t.status === "open").length, color: "from-primary to-secondary" },
+    { label: "قيد التنفيذ", value: tickets.filter(t => t.status === "in_progress").length, color: "from-blue-500 to-cyan-500" },
+    { label: "تم الحل", value: tickets.filter(t => t.status === "resolved").length, color: "from-available to-emerald-500" },
+    { label: "إجمالي الطلبات", value: tickets.length, color: "from-amber-500 to-orange-500" },
   ];
 
   return (
@@ -123,7 +175,7 @@ export default function MaintenancePage() {
               <h1 className="text-3xl font-black text-foreground">الصيانة</h1>
               <p className="text-muted-foreground">إدارة طلبات الصيانة والأعطال</p>
             </div>
-            <Button className="gradient-primary">
+            <Button className="gradient-primary" onClick={() => setDialogOpen(true)}>
               <Plus className="w-5 h-5 ml-2" />
               إضافة طلب صيانة
             </Button>
@@ -160,19 +212,8 @@ export default function MaintenancePage() {
                   <SelectItem value="all">كل الحالات</SelectItem>
                   <SelectItem value="open">مفتوح</SelectItem>
                   <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-                  <SelectItem value="completed">مكتمل</SelectItem>
-                  <SelectItem value="on_hold">معلق</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select defaultValue="all">
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="الأولوية" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل الأولويات</SelectItem>
-                  <SelectItem value="high">عاجل</SelectItem>
-                  <SelectItem value="medium">متوسط</SelectItem>
-                  <SelectItem value="low">منخفض</SelectItem>
+                  <SelectItem value="resolved">تم الحل</SelectItem>
+                  <SelectItem value="closed">مغلق</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -189,13 +230,13 @@ export default function MaintenancePage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-muted-foreground">#{ticket.id}</span>
+                      <span className="text-sm text-muted-foreground">#{ticket.id.substring(0, 8)}</span>
                       {getSeverityBadge(ticket.severity)}
                     </div>
                     <h3 className="text-lg font-bold text-foreground mb-1">{ticket.title}</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Building2 className="w-4 h-4" />
-                      <span>{ticket.unit} - {ticket.property}</span>
+                      <span>{ticket.units?.name || 'وحدة محذوفة'} - {ticket.units?.properties?.name_ar || ticket.units?.properties?.name || 'عقار محذوف'}</span>
                     </div>
                   </div>
                 </div>
@@ -207,7 +248,7 @@ export default function MaintenancePage() {
 
                 {/* Description */}
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {ticket.description}
+                  {ticket.description || "لا يوجد وصف"}
                 </p>
 
                 {/* Details */}
@@ -216,46 +257,79 @@ export default function MaintenancePage() {
                     <div className="flex items-center gap-2 text-sm">
                       <User className="w-4 h-4 text-muted-foreground" />
                       <span className="text-foreground">
-                        {ticket.assignedTo || "لم يُعيّن بعد"}
+                        {ticket.users?.full_name || "لم يُعيّن بعد"}
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">SLA: {ticket.sla}</span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <DollarSign className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-bold text-foreground">{ticket.estimatedCost}</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {ticket.createdAt}
+                      <span className="font-bold text-foreground">﷼{ticket.estimated_cost || 0}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-border/50">
-                  {ticket.status === "open" && (
-                    <Button size="sm" className="flex-1 gradient-primary">
-                      تعيين فني
-                    </Button>
-                  )}
-                  {ticket.status === "in_progress" && (
-                    <Button size="sm" className="flex-1 bg-available hover:bg-available/90">
-                      <CheckCircle2 className="w-4 h-4 ml-2" />
-                      إتمام
-                    </Button>
-                  )}
-                  <Button size="sm" variant="outline" className="flex-1">
-                    عرض التفاصيل
+                  <Button size="sm" variant="ghost" onClick={() => handleView(ticket)}>
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleEdit(ticket)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(ticket)}>
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Dialogs */}
+        <MaintenanceDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          mode="add"
+          onSuccess={handleSuccess}
+        />
+
+        <MaintenanceDialog
+          open={viewDialogOpen}
+          onOpenChange={setViewDialogOpen}
+          mode="view"
+          ticket={selectedTicket}
+        />
+
+        <MaintenanceDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          mode="edit"
+          ticket={selectedTicket}
+          onSuccess={handleSuccess}
+        />
+
+        {/* Delete Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                سيتم حذف طلب الصيانة "{selectedTicket?.title}" نهائياً.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete} 
+                disabled={isDeleting}
+                className="bg-destructive"
+              >
+                {isDeleting ? "جاري الحذف..." : "حذف"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </AppShell>
     </>
   );
