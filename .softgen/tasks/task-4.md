@@ -1,47 +1,50 @@
 ---
-title: SaaS Admin Dashboard - لوحة إدارة المنصة
+title: Calendar & Reservations
 status: done
 priority: high
 type: feature
-tags: [admin, saas, subscriptions, payments]
+tags: [calendar, reservations, booking, controllers, pages]
 created_by: agent
-created_at: 2026-05-07
+created_at: 2026-06-03T12:37:21Z
 position: 4
 ---
 
 ## Notes
-Build a comprehensive SaaS admin dashboard for platform administrators to monitor subscriptions, payments, revenue, user growth, and platform health metrics. This is for Daryum's internal team to manage the SaaS business.
+Complete additional Laravel controllers and Vue.js pages for Units, Reservations, and Dashboard Analytics.
 
-Must include:
-- Platform-wide KPIs (total users, MRR, ARR, churn rate)
-- Active subscriptions table with filters
-- Recent payments log
-- Plan distribution visualization
-- Revenue and user growth charts
-- Conversion funnel metrics
-- Customer LTV tracking
-- Trial-to-paid conversion rates
+**Laravel Controllers Added:**
+- ✅ UnitController (CRUD + Status Management)
+- ✅ ReservationController (CRUD + Check-in/Check-out)
+- ✅ DashboardController (KPIs + Analytics)
 
-Design: Same blue-purple gradient system, RTL, premium business dashboard aesthetic.
+**Vue.js Pages Added:**
+- ✅ Properties Page (Grid/List views)
+- ✅ Units Page (Filters + Management)
+- ✅ Reservations Page (Advanced filters + Actions)
+
+**Documentation:**
+- ✅ ADDITIONAL_CONTROLLERS.md (474 lines)
+- ✅ VUE_ADDITIONAL_PAGES.md (589 lines)
 
 ## Checklist
-- [x] Create /admin route and page
-- [x] Build Platform KPIs component (8 key metrics)
-- [x] Create Subscriptions Table with status filters
-- [x] Build Recent Payments table
-- [x] Add Plan Distribution pie chart
-- [x] Implement Revenue Growth line chart
-- [x] Add User Growth chart
-- [x] Build Conversion Funnel metrics
-- [x] Add Customer LTV and cohort analysis
-- [x] Implement filters mockups
-- [x] Ensure RTL support
-- [x] Test responsive layout
-- [x] Add to sidebar navigation
+- [x] Unit Controller with CRUD operations
+- [x] Reservation Controller with booking logic
+- [x] Dashboard Analytics Controller
+- [x] Check-in/Check-out functionality
+- [x] Status management endpoints
+- [x] Availability checking
+- [x] Properties page with grid/list views
+- [x] Units page with comprehensive filters
+- [x] Reservations page with actions
+- [x] API route definitions
+- [x] Testing examples
+- [x] Integration documentation
 
 ## Acceptance
-- ✅ Admin dashboard accessible at /admin
-- ✅ Shows realistic SaaS metrics (MRR in SAR, user counts, churn %)
-- ✅ Subscriptions table displays active/trial/cancelled states
-- ✅ Charts show growth trends over time
-- ✅ All text in Arabic with proper RTL layout
+- Laravel controllers handle all CRUD operations
+- Reservation conflicts are prevented
+- Check-in/check-out flow works correctly
+- Vue.js pages integrate with Laravel APIs
+- Filters work properly on frontend
+- Status badges display correctly
+- All actions trigger appropriate API calls
