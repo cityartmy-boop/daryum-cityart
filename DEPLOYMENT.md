@@ -1,350 +1,445 @@
-# 🚀 دليل النشر الكامل - Daryum Platform
-
-دليل شامل خطوة بخطوة لنشر منصة داريوم على الإنتاج.
-
----
-
-## 📋 المتطلبات المسبقة
-
-قبل البدء، تأكد من توفر:
-
-- ✅ حساب GitHub
-- ✅ حساب Supabase (مجاني)
-- ✅ حساب Vercel (مجاني)
-- ✅ Node.js 18+ مثبت محلياً
+# 🚀 Production Deployment Guide
+# دليل النشر للإنتاج
 
 ---
 
-## 🗄️ الخطوة 1: إعداد قاعدة البيانات Supabase
+## 📋 Overview
 
-### 1.1 إنشاء مشروع Supabase
-
-1. **اذهب إلى:** https://supabase.com
-2. **انقر على:** "Start your project"
-3. **سجل دخول** باستخدام GitHub
-4. **انقر على:** "New Project"
-5. **املأ البيانات:**
-   - Project Name: `daryum-production`
-   - Database Password: (احفظها في مكان آمن)
-   - Region: `Middle East (Bahrain)` - الأقرب للسعودية
-   - Pricing Plan: `Free` (للبداية)
-6. **انقر:** "Create new project"
-7. **انتظر** 2-3 دقائق لإنشاء المشروع
-
-### 1.2 الحصول على مفاتيح API
-
-1. **في لوحة تحكم Supabase:**
-2. **اذهب إلى:** Settings (⚙️) → API
-3. **انسخ هذه القيم:**
-   ```
-   Project URL: https://xxxxxxxxxxxxx.supabase.co
-   anon public key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-   ```
-4. **احتفظ بهما** - ستحتاجهما لاحقاً
-
-### 1.3 تشغيل Database Schema
-
-1. **في لوحة Supabase:**
-2. **اذهب إلى:** SQL Editor (📝)
-3. **انقر:** "New Query"
-4. **افتح ملف** `supabase-schema.sql` من المشروع
-5. **انسخ المحتوى كاملاً** والصقه في المحرر
-6. **انقر:** "Run" (أو اضغط Ctrl+Enter)
-7. **انتظر** حتى يظهر: `Success. No rows returned`
-
-✅ **تأكد من النجاح:**
-- اذهب إلى: Table Editor
-- يجب أن ترى 13 جدول: users, roles, properties, units, etc.
-
-### 1.4 إعداد Authentication
-
-1. **اذهب إلى:** Authentication → Providers
-2. **فعّل Email:**
-   - Enable Email provider: ✅
-   - Confirm email: ❌ (اختياري للتطوير)
-3. **اضبط URL Settings:**
-   - Site URL: `http://localhost:3000` (مؤقت)
-   - Redirect URLs: `http://localhost:3000/**`
+This guide covers deploying the Laravel + Vue.js project to production.
+هذا الدليل يغطي نشر مشروع Laravel + Vue.js للإنتاج.
 
 ---
 
-## 🔧 الخطوة 2: إعداد المشروع محلياً
+## 🔧 Option 1: VPS Deployment (DigitalOcean, Linode, Vultr)
 
-### 2.1 استنساخ المشروع
+### Backend: Laravel on VPS
+
+#### Step 1: Server Setup
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install required packages
+sudo apt install -y nginx mysql-server php8.2-fpm php8.2-mysql php8.2-mbstring php8.2-xml php8.2-curl php8.2-zip composer git
+
+# Install Node.js (for asset compilation)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+#### Step 2: Setup MySQL
+```bash
+sudo mysql_secure_installation
+
+# Create database
+sudo mysql -e "CREATE DATABASE daryum CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "CREATE USER 'daryum_user'@'localhost' IDENTIFIED BY 'secure_password';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON daryum.* TO 'daryum_user'@'localhost';"
+sudo mysql -e "FLUSH PRIVILEGES;"
+```
+
+#### Step 3: Deploy Laravel
+```bash
+# Clone repository
+cd /var/www
+sudo git clone your-repository.git daryum-backend
+cd daryum-backend
+
+# Install dependencies
+sudo composer install --optimize-autoloader --no-dev
+
+# Setup environment
+sudo cp .env.example .env
+sudo nano .env
+# Update APP_ENV=production, database credentials, etc.
+
+# Generate key
+sudo php artisan key:generate
+
+# Run migrations
+sudo php artisan migrate --force
+
+# Optimize
+sudo php artisan config:cache
+sudo php artisan route:cache
+sudo php artisan view:cache
+
+# Set permissions
+sudo chown -R www-data:www-data /var/www/daryum-backend
+sudo chmod -R 755 /var/www/daryum-backend/storage
+```
+
+#### Step 4: Configure Nginx
+```bash
+sudo nano /etc/nginx/sites-available/daryum-api
+```
+
+```nginx
+server {
+    listen 80;
+    server_name api.daryum.sa;
+    root /var/www/daryum-backend/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php;
+
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
 
 ```bash
-# إذا كنت تستخدم Git
-git clone your-repo-url
-cd daryum-platform
-
-# تثبيت المكتبات
-npm install
+# Enable site
+sudo ln -s /etc/nginx/sites-available/daryum-api /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
 ```
 
-### 2.2 إعداد Environment Variables
+#### Step 5: Setup SSL (Let's Encrypt)
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d api.daryum.sa
+```
 
-1. **أنشئ ملف** `.env.local` في الجذر
-2. **انسخ المحتوى من** `.env.example`
-3. **استبدل القيم:**
+---
+
+### Frontend: Vue.js on VPS
+
+#### Step 1: Build Vue.js
+```bash
+# On your local machine
+cd daryum-frontend
+
+# Update API URL in .env
+echo "VITE_API_URL=https://api.daryum.sa" > .env.production
+
+# Build for production
+npm run build
+```
+
+#### Step 2: Deploy to VPS
+```bash
+# Copy dist folder to server
+scp -r dist/* user@your-server:/var/www/daryum-frontend/
+```
+
+#### Step 3: Configure Nginx
+```bash
+sudo nano /etc/nginx/sites-available/daryum-frontend
+```
+
+```nginx
+server {
+    listen 80;
+    server_name daryum.sa www.daryum.sa;
+    root /var/www/daryum-frontend;
+
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
 
 ```bash
-# .env.local
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=داريوم
+sudo ln -s /etc/nginx/sites-available/daryum-frontend /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+sudo certbot --nginx -d daryum.sa -d www.daryum.sa
 ```
 
-### 2.3 اختبار محلي
+---
+
+## 🔧 Option 2: Cloud Deployment (Recommended for Beginners)
+
+### Backend: Laravel on Laravel Forge / Ploi.io
+
+1. **Sign up for Laravel Forge** (https://forge.laravel.com)
+2. **Connect your server** (DigitalOcean, AWS, etc.)
+3. **Create site**: api.daryum.sa
+4. **Deploy repository**: Connect GitHub/GitLab
+5. **Setup environment**: Add .env variables
+6. **Enable quick deploy**: Auto-deploy on push
+7. **Setup SSL**: One-click Let's Encrypt
+
+### Frontend: Vue.js on Vercel / Netlify
+
+#### Deploy to Vercel:
+```bash
+cd daryum-frontend
+
+# Install Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Deploy
+vercel --prod
+```
+
+#### Deploy to Netlify:
+```bash
+# Install Netlify CLI
+npm i -g netlify-cli
+
+# Login
+netlify login
+
+# Deploy
+netlify deploy --prod
+```
+
+---
+
+## 🔧 Option 3: All-in-One Platform
+
+### Deploy to Railway.app
+
+#### Backend:
+1. Create new project on Railway
+2. Add MySQL database
+3. Deploy Laravel from GitHub
+4. Set environment variables
+5. Done!
+
+#### Frontend:
+1. Create new project on Railway
+2. Deploy Vue.js from GitHub
+3. Set VITE_API_URL
+4. Done!
+
+---
+
+## 📱 Environment Variables
+
+### Laravel (.env)
+```env
+APP_NAME=Daryum
+APP_ENV=production
+APP_KEY=base64:...
+APP_DEBUG=false
+APP_URL=https://api.daryum.sa
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=daryum
+DB_USERNAME=daryum_user
+DB_PASSWORD=your_secure_password
+
+SANCTUM_STATEFUL_DOMAINS=daryum.sa,www.daryum.sa
+SESSION_DRIVER=cookie
+SESSION_DOMAIN=.daryum.sa
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+```
+
+### Vue.js (.env.production)
+```env
+VITE_API_URL=https://api.daryum.sa
+VITE_APP_NAME=Daryum
+```
+
+---
+
+## 🔒 Security Checklist
+
+- [ ] Set `APP_DEBUG=false` in production
+- [ ] Use strong database passwords
+- [ ] Enable SSL certificates (HTTPS)
+- [ ] Configure firewall (UFW)
+- [ ] Setup fail2ban for SSH protection
+- [ ] Enable CORS properly
+- [ ] Use environment variables for secrets
+- [ ] Setup backup system
+- [ ] Monitor logs
+- [ ] Keep packages updated
+
+---
+
+## 📊 Performance Optimization
+
+### Laravel:
+```bash
+# Optimize for production
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan optimize
+
+# Setup queue worker
+php artisan queue:work --daemon
+
+# Setup scheduler (add to crontab)
+* * * * * cd /var/www/daryum-backend && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Vue.js:
+```javascript
+// vite.config.js
+export default {
+  build: {
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+      },
+    },
+  },
+}
+```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions (.github/workflows/deploy.yml)
+```yaml
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /var/www/daryum-backend
+            git pull origin main
+            composer install --no-dev
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and Deploy
+        run: |
+          npm ci
+          npm run build
+          # Deploy to Vercel/Netlify
+```
+
+---
+
+## 📈 Monitoring
+
+### Setup Laravel Telescope (Development)
+```bash
+composer require laravel/telescope --dev
+php artisan telescope:install
+php artisan migrate
+```
+
+### Setup Error Tracking (Production)
+```bash
+# Install Sentry
+composer require sentry/sentry-laravel
+
+# Configure in .env
+SENTRY_LARAVEL_DSN=your-dsn-here
+```
+
+---
+
+## 💾 Backup Strategy
+
+### Daily Database Backup
+```bash
+# Create backup script
+sudo nano /usr/local/bin/backup-db.sh
+```
 
 ```bash
-# تشغيل المشروع
-npm run dev
-
-# افتح المتصفح
-http://localhost:3000
+#!/bin/bash
+DATE=$(date +%Y-%m-%d)
+mysqldump -u daryum_user -p'password' daryum > /backups/daryum-$DATE.sql
+find /backups -type f -mtime +7 -delete
 ```
-
-✅ **تأكد من:**
-- الصفحة الرئيسية تعمل
-- يمكنك الذهاب إلى `/login`
-- لا توجد أخطاء في Console
-
----
-
-## 🌐 الخطوة 3: النشر على Vercel
-
-### 3.1 ربط GitHub
-
-1. **ارفع المشروع إلى GitHub:**
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit - Daryum Platform"
-git branch -M main
-git remote add origin your-github-repo-url
-git push -u origin main
-```
+sudo chmod +x /usr/local/bin/backup-db.sh
 
-### 3.2 إنشاء مشروع Vercel
-
-1. **اذهب إلى:** https://vercel.com
-2. **سجل دخول** باستخدام GitHub
-3. **انقر:** "Add New..." → "Project"
-4. **اختر:** repository من GitHub
-5. **انقر:** "Import"
-
-### 3.3 إعداد Build Settings
-
-**Vercel ستكتشف Next.js تلقائياً، تأكد من:**
-
-- Framework Preset: `Next.js`
-- Root Directory: `./`
-- Build Command: `npm run build`
-- Output Directory: `.next`
-- Install Command: `npm install`
-
-### 3.4 إضافة Environment Variables
-
-**في صفحة الإعداد، أضف:**
-
-```
-NEXT_PUBLIC_SUPABASE_URL = https://xxxxxxxxxxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-NEXT_PUBLIC_APP_URL = https://your-project.vercel.app
-NEXT_PUBLIC_APP_NAME = داريوم
-```
-
-### 3.5 Deploy
-
-1. **انقر:** "Deploy"
-2. **انتظر** 2-3 دقائق
-3. **ستحصل على URL:** `https://your-project.vercel.app`
-
----
-
-## 🔗 الخطوة 4: ربط Supabase بـ Vercel
-
-### 4.1 تحديث Redirect URLs في Supabase
-
-1. **عد إلى Supabase Dashboard**
-2. **اذهب إلى:** Authentication → URL Configuration
-3. **حدّث:**
-   - Site URL: `https://your-project.vercel.app`
-   - Redirect URLs: `https://your-project.vercel.app/**`
-
-### 4.2 تحديث CORS (اختياري)
-
-في Supabase:
-- اذهب إلى: Settings → API
-- Additional Allowed Origins: `https://your-project.vercel.app`
-
----
-
-## 👤 الخطوة 5: إنشاء حساب Admin الأول
-
-### 5.1 عبر Supabase Dashboard
-
-1. **اذهب إلى:** Authentication → Users
-2. **انقر:** "Add user" → "Create new user"
-3. **املأ:**
-   - Email: `admin@daryum.sa`
-   - Password: (كلمة مرور قوية)
-   - Auto Confirm User: ✅
-4. **انقر:** "Create user"
-
-### 5.2 إضافة بيانات المستخدم
-
-1. **اذهب إلى:** Table Editor → `users`
-2. **انقر:** "Insert" → "Insert row"
-3. **املأ:**
-   ```
-   id: (نسخ من auth.users)
-   email: admin@daryum.sa
-   full_name: مدير النظام
-   role: admin
-   status: active
-   workspace_id: (اتركه null مؤقتاً)
-   ```
-
----
-
-## ✅ الخطوة 6: اختبار نهائي
-
-### 6.1 Checklist
-
-- [ ] الصفحة الرئيسية تعمل: `https://your-project.vercel.app`
-- [ ] صفحة Login تعمل: `/login`
-- [ ] يمكن تسجيل الدخول بحساب Admin
-- [ ] Dashboard يظهر بعد الدخول
-- [ ] صفحات Admin تعمل: `/admin`
-- [ ] لا توجد أخطاء في Console
-- [ ] RTL يعمل بشكل صحيح
-
-### 6.2 اختبار الأداء
-
-```bash
-# Lighthouse Score
-- Performance: > 90
-- Accessibility: > 90
-- Best Practices: > 90
-- SEO: > 90
+# Add to crontab
+sudo crontab -e
+0 2 * * * /usr/local/bin/backup-db.sh
 ```
 
 ---
 
-## 🎨 الخطوة 7: Domain مخصص (اختياري)
+## 🆘 Troubleshooting
 
-### 7.1 في Vercel
+### Issue: 500 Error
+- Check Laravel logs: `storage/logs/laravel.log`
+- Check Nginx error log: `/var/log/nginx/error.log`
+- Verify file permissions: `sudo chown -R www-data:www-data storage`
 
-1. **اذهب إلى:** Settings → Domains
-2. **انقر:** "Add Domain"
-3. **أدخل:** `daryum.sa` أو `app.daryum.sa`
-4. **اتبع التعليمات** لإعداد DNS
+### Issue: API Connection Refused
+- Check if Laravel is running: `ps aux | grep php`
+- Check firewall: `sudo ufw status`
+- Verify Nginx configuration: `sudo nginx -t`
 
-### 7.2 تحديث Supabase
-
-- Site URL: `https://app.daryum.sa`
-- Redirect URLs: `https://app.daryum.sa/**`
-
----
-
-## 📊 الخطوة 8: Monitoring & Analytics
-
-### 8.1 Vercel Analytics
-
-1. **اذهب إلى:** Analytics في Vercel
-2. **فعّل:** Web Analytics
-3. **راقب:** Performance metrics
-
-### 8.2 Supabase Monitoring
-
-1. **اذهب إلى:** Reports في Supabase
-2. **راقب:**
-   - API requests
-   - Database size
-   - Active users
+### Issue: Database Connection Failed
+- Check MySQL is running: `sudo systemctl status mysql`
+- Verify credentials in `.env`
+- Test connection: `php artisan tinker` then `DB::connection()->getPdo();`
 
 ---
 
-## 🔐 الخطوة 9: الأمان
+## 📞 Support
 
-### 9.1 Row Level Security (RLS)
-
-✅ **تم تفعيلها بالفعل في Schema**
-
-تأكد من:
-- جميع الجداول لديها RLS enabled
-- Policies صحيحة لكل جدول
-
-### 9.2 API Rate Limiting
-
-في Supabase:
-- اذهب إلى: Settings → API
-- راجع Rate limits
-
-### 9.3 Secrets Management
-
-- ❌ **لا تشارك** Environment Variables
-- ✅ **استخدم** Vercel Environment Variables
-- ✅ **غيّر** Database Password بانتظام
+For deployment issues:
+- Laravel Docs: https://laravel.com/docs/deployment
+- Vue.js Deployment: https://vitejs.dev/guide/static-deploy.html
+- DigitalOcean Tutorials: https://www.digitalocean.com/community/tutorials
 
 ---
 
-## 🚨 استكشاف الأخطاء
+**Deployment Complete! 🎉**
 
-### مشكلة: "Supabase connection failed"
-
-**الحل:**
-1. تأكد من صحة `NEXT_PUBLIC_SUPABASE_URL`
-2. تأكد من صحة `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. تحقق من Supabase Project status
-
-### مشكلة: "Auth redirect not working"
-
-**الحل:**
-1. تحقق من Redirect URLs في Supabase
-2. تأكد من `NEXT_PUBLIC_APP_URL` صحيح
-3. امسح Cache المتصفح
-
-### مشكلة: "Build failed on Vercel"
-
-**الحل:**
-1. تحقق من Build logs
-2. تأكد من Environment Variables مضافة
-3. جرّب: `npm run build` محلياً
-
----
-
-## 📞 الدعم
-
-إذا واجهت مشاكل:
-
-1. **راجع الأخطاء في:**
-   - Vercel Logs: Dashboard → Deployments → View Function Logs
-   - Supabase Logs: Dashboard → Logs Explorer
-   - Browser Console: F12 → Console
-
-2. **الموارد:**
-   - Supabase Docs: https://supabase.com/docs
-   - Vercel Docs: https://vercel.com/docs
-   - Next.js Docs: https://nextjs.org/docs
-
----
-
-## 🎉 تهانينا!
-
-منصة داريوم جاهزة للعمل الآن! 🚀
-
-**الخطوات التالية:**
-- [ ] دعوة أعضاء الفريق
-- [ ] إضافة بيانات حقيقية
-- [ ] تخصيص الإعدادات
-- [ ] إعداد النسخ الاحتياطي
-- [ ] تدريب المستخدمين
-
----
-
-**Built with ❤️ for Saudi property operators**
+Your application is now live and ready for users!
+تطبيقك الآن منشور وجاهز للمستخدمين!
