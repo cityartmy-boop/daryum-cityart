@@ -7,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { expensesService, type ExpenseWithCategory } from "@/services/expenses.service";
-import { propertiesService } from "@/services/properties.service";
-import { unitsService } from "@/services/units.service";
+import { PropertiesService } from "@/services/properties.service";
+import { UnitsService } from "@/services/units.service";
 import type { Database } from "@/integrations/supabase/types";
 
 type ExpenseCategory = Database["public"]["Tables"]["expense_categories"]["Row"];
@@ -55,9 +55,9 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
           unit_id: expense.unit_id || "",
           amount: expense.amount.toString(),
           expense_date: expense.expense_date,
-          status: expense.status,
+          status: expense.status as "pending" | "approved" | "paid" | "rejected",
           payment_method: expense.payment_method || "",
-          vendor: expense.vendor || "",
+          vendor: "",
           receipt_url: expense.receipt_url || "",
           notes: expense.notes || "",
         });
@@ -80,7 +80,7 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
     try {
       const [categoriesData, propertiesData] = await Promise.all([
         expensesService.getCategories(),
-        propertiesService.getProperties(),
+        PropertiesService.getAll(),
       ]);
       setCategories(categoriesData);
       setProperties(propertiesData);
@@ -95,7 +95,7 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
 
   const loadUnits = async (propertyId: string) => {
     try {
-      const unitsData = await unitsService.getUnitsByProperty(propertyId);
+      const unitsData = await UnitsService.getByProperty(propertyId);
       setUnits(unitsData);
     } catch (error: any) {
       console.error("Error loading units:", error);

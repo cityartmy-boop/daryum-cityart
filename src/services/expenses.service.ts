@@ -132,7 +132,7 @@ export const expensesService = {
     return data;
   },
 
-  async updateExpense(id: string, updates: ExpenseUpdate) {
+  async updateExpense(id: string, updates: Omit<ExpenseUpdate, "expense_number">) {
     const { data, error } = await supabase
       .from("expenses")
       .update({
