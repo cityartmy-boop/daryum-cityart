@@ -13,6 +13,23 @@ export interface ExpenseWithCategory extends Expense {
   units?: { unit_number: string } | null;
 }
 
+// Custom interface for updating expenses (expense_number is auto-generated, not updated)
+export interface ExpenseUpdateData {
+  title?: string;
+  description?: string | null;
+  category_id?: string;
+  property_id?: string | null;
+  unit_id?: string | null;
+  amount?: number;
+  expense_date?: string;
+  status?: "pending" | "approved" | "paid" | "rejected";
+  payment_method?: string | null;
+  receipt_url?: string | null;
+  notes?: string | null;
+  approved_by?: string | null;
+  approved_at?: string | null;
+}
+
 export const expensesService = {
   // ===== Categories =====
   async getCategories() {
@@ -132,7 +149,7 @@ export const expensesService = {
     return data;
   },
 
-  async updateExpense(id: string, updates: Omit<ExpenseUpdate, "expense_number">) {
+  async updateExpense(id: string, updates: ExpenseUpdateData) {
     const { data, error } = await supabase
       .from("expenses")
       .update({
