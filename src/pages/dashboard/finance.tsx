@@ -27,9 +27,10 @@ export default function FinancePage() {
 
   const stats = [
     { label: "إجمالي الإيرادات", value: "﷼ 2,480,000", change: "+12.5%", trend: "up", color: "from-primary to-secondary" },
+    { label: "إجمالي المصروفات", value: "﷼ 156,000", change: "+5.2%", trend: "up", color: "from-red-500 to-orange-500" },
     { label: "العمولات المدفوعة", value: "﷼ 372,000", change: "-2.1%", trend: "down", color: "from-amber-500 to-orange-500" },
     { label: "المستحقات للملاك", value: "﷼ 1,864,000", change: "+15.3%", trend: "up", color: "from-blue-500 to-cyan-500" },
-    { label: "صافي الربح", value: "﷼ 244,000", change: "+8.7%", trend: "up", color: "from-emerald-500 to-green-500" },
+    { label: "صافي الربح", value: "﷼ 88,000", change: "+3.2%", trend: "up", color: "from-emerald-500 to-green-500" },
   ];
 
   const transactions = [
@@ -128,7 +129,7 @@ export default function FinancePage() {
           </div>
 
           {/* KPIs */}
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-5 gap-4">
             {stats.map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6">
                 <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} p-3 mb-3`}>

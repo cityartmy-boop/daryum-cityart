@@ -20,7 +20,8 @@ import {
   BookOpen,
   Globe,
   Bell,
-  Headphones
+  Headphones,
+  Receipt
 } from "lucide-react";
 
 export function Sidebar() {
@@ -34,6 +35,7 @@ export function Sidebar() {
     { icon: Calendar, label: "التقويم", href: "/dashboard/calendar", show: hasPermission("canViewCalendar") },
     { icon: BookOpen, label: "الحجوزات", href: "/dashboard/reservations", show: hasPermission("canViewReservations") },
     { icon: Globe, label: "القنوات", href: "/dashboard/channels", show: hasPermission("canViewProperties") },
+    { icon: Receipt, label: "المصروفات", href: "/dashboard/expenses", show: hasPermission("canViewFinance") },
     { icon: MessageSquare, label: "الرسائل", href: "/dashboard/messages", badge: "12", show: hasPermission("canViewMessages") },
     { icon: ClipboardCheck, label: "التنظيف", href: "/dashboard/housekeeping", show: hasPermission("canViewHousekeeping") },
     { icon: Wrench, label: "الصيانة", href: "/dashboard/maintenance", show: hasPermission("canViewMaintenance") },
