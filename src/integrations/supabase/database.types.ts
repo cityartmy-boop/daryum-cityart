@@ -1,4 +1,4 @@
- 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export type Json =
   | string
   | number
@@ -59,6 +59,147 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      expense_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_ar: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_ar: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_ar?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category_id: string
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          expense_date: string
+          expense_number: string
+          id: string
+          notes: string | null
+          paid_to: string | null
+          payment_method: string | null
+          property_id: string | null
+          receipt_url: string | null
+          status: string
+          title: string
+          unit_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category_id: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          expense_date: string
+          expense_number: string
+          id?: string
+          notes?: string | null
+          paid_to?: string | null
+          payment_method?: string | null
+          property_id?: string | null
+          receipt_url?: string | null
+          status?: string
+          title: string
+          unit_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          expense_date?: string
+          expense_number?: string
+          id?: string
+          notes?: string | null
+          paid_to?: string | null
+          payment_method?: string | null
+          property_id?: string | null
+          receipt_url?: string | null
+          status?: string
+          title?: string
+          unit_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       housekeeping_tasks: {
         Row: {
