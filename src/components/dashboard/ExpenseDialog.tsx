@@ -126,7 +126,6 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
         expense_date: formData.expense_date,
         status: formData.status,
         payment_method: formData.payment_method || null,
-        vendor: formData.vendor || null,
         receipt_url: formData.receipt_url || null,
         notes: formData.notes || null,
       };
