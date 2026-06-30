@@ -130,7 +130,7 @@ export const expensesService = {
     return data as ExpenseWithCategory;
   },
 
-  async createExpense(expense: ExpenseInsert) {
+  async createExpense(expense: Omit<ExpenseInsert, "expense_number" | "created_at" | "updated_at" | "created_by">) {
     // Generate expense number
     const timestamp = Date.now();
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
