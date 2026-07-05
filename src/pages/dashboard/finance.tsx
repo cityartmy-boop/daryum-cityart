@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
-import { getExpenseStats } from "@/services/expenses.service";
 import {
   Select,
   SelectContent,
@@ -25,51 +23,15 @@ import {
 
 export default function FinancePage() {
   const [filter, setFilter] = useState("all");
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  async function loadStats() {
-    try {
-      setLoading(true);
-      const data = await getExpenseStats();
-      setStats(data);
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("ar-SA", {
-      style: "currency",
-      currency: "SAR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
+  // Static KPI data for finance overview
   const kpiCards = [
     { 
       label: "إجمالي الإيرادات", 
-      value: stats ? formatCurrency(stats.total_revenue) : "...", 
+      value: "﷼ 2,480,000", 
       change: "+12.5%", 
       trend: "up", 
       color: "from-primary to-secondary" 
-    },
-    { 
-      label: "إجمالي المصروفات", 
-      value: stats ? formatCurrency(stats.total_expenses) : "...", 
-      change: "+5.2%", 
-      trend: "up", 
-      color: "from-red-500 to-orange-500" 
     },
     { 
       label: "العمولات المدفوعة", 
@@ -86,10 +48,10 @@ export default function FinancePage() {
       color: "from-blue-500 to-cyan-500" 
     },
     { 
-      label: "صافي الربح", 
-      value: stats ? formatCurrency(stats.net_profit) : "...", 
-      change: stats && stats.net_profit > 0 ? "+3.2%" : "-3.2%", 
-      trend: stats && stats.net_profit > 0 ? "up" : "down", 
+      label: "الرصيد المتاح", 
+      value: "﷼ 244,000", 
+      change: "+8.4%", 
+      trend: "up", 
       color: "from-emerald-500 to-green-500" 
     },
   ];
@@ -138,12 +100,12 @@ export default function FinancePage() {
     {
       id: "TXN-2026-005",
       date: "2026-05-04",
-      type: "expense",
-      description: "صيانة - وحدة B3",
-      amount: "﷼ 850",
+      type: "revenue",
+      description: "حجز - فهد العتيبي - وحدة B2",
+      amount: "﷼ 1,650",
       status: "completed",
-      channel: "نقدي",
-      vat: "﷼ 127.50"
+      channel: "Airbnb",
+      vat: "﷼ 247.50"
     },
   ];
 
@@ -152,7 +114,6 @@ export default function FinancePage() {
       case "revenue": return <Badge className="bg-available">إيراد</Badge>;
       case "commission": return <Badge className="bg-amber-500">عمولة</Badge>;
       case "payout": return <Badge className="bg-blue-500">دفعة</Badge>;
-      case "expense": return <Badge variant="destructive">مصروف</Badge>;
       default: return <Badge variant="outline">غير محدد</Badge>;
     }
   };
@@ -175,7 +136,7 @@ export default function FinancePage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-black text-foreground">المالية</h1>
-              <p className="text-muted-foreground">إدارة الإيرادات والمصروفات والأرباح</p>
+              <p className="text-muted-foreground">إدارة الإيرادات والمعاملات المالية</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline">
@@ -190,14 +151,14 @@ export default function FinancePage() {
           </div>
 
           {/* KPIs */}
-          <div className="grid md:grid-cols-5 gap-4">
+          <div className="grid md:grid-cols-4 gap-4">
             {kpiCards.map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6">
                 <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} p-3 mb-3`}>
                   <DollarSign className="w-full h-full text-white" />
                 </div>
                 <div className="text-2xl font-bold text-foreground tabular-nums mb-1">
-                  {loading ? "..." : stat.value}
+                  {stat.value}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{stat.label}</span>
@@ -229,7 +190,6 @@ export default function FinancePage() {
                   <SelectItem value="revenue">إيرادات</SelectItem>
                   <SelectItem value="commission">عمولات</SelectItem>
                   <SelectItem value="payout">دفعات</SelectItem>
-                  <SelectItem value="expense">مصروفات</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline">
