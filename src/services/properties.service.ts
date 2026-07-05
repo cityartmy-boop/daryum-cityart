@@ -1,5 +1,13 @@
 import { supabase, Property, PropertyType, PropertyStatus } from '@/lib/supabase';
 
+// Export Property type for external use
+export type { Property, PropertyType, PropertyStatus };
+
+// Convenience function for getting properties
+export async function getProperties(): Promise<Property[]> {
+  return PropertiesService.getAll();
+}
+
 export class PropertiesService {
   // Get all properties
   static async getAll() {

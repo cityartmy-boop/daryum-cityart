@@ -1,5 +1,16 @@
 import { supabase, Unit, UnitType, UnitStatus } from '@/lib/supabase';
 
+// Export Unit type for external use
+export type { Unit, UnitType, UnitStatus };
+
+// Convenience function for getting units with optional filters
+export async function getUnits(filters?: { property_id?: string }): Promise<Unit[]> {
+  if (filters?.property_id) {
+    return UnitsService.getByProperty(filters.property_id);
+  }
+  return UnitsService.getAll();
+}
+
 export class UnitsService {
   // Get all units
   static async getAll() {
