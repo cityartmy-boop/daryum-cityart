@@ -36,8 +36,8 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props)
   const [units, setUnits] = useState<Unit[]>([]);
   const [formData, setFormData] = useState({
     category_id: "",
-    property_id: "",
-    unit_id: "",
+    property_id: "none",
+    unit_id: "none",
     amount: "",
     description: "",
     expense_date: new Date().toISOString().split("T")[0],
@@ -52,8 +52,8 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props)
       if (expense) {
         setFormData({
           category_id: expense.category_id,
-          property_id: expense.property_id || "",
-          unit_id: expense.unit_id || "",
+          property_id: expense.property_id || "none",
+          unit_id: expense.unit_id || "none",
           amount: expense.amount.toString(),
           description: expense.description,
           expense_date: expense.expense_date,
@@ -68,11 +68,11 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props)
   }, [open, expense]);
 
   useEffect(() => {
-    if (formData.property_id) {
+    if (formData.property_id && formData.property_id !== "none") {
       loadUnits(formData.property_id);
     } else {
       setUnits([]);
-      setFormData((prev) => ({ ...prev, unit_id: "" }));
+      setFormData((prev) => ({ ...prev, unit_id: "none" }));
     }
   }, [formData.property_id]);
 
@@ -109,8 +109,8 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props)
   function resetForm() {
     setFormData({
       category_id: "",
-      property_id: "",
-      unit_id: "",
+      property_id: "none",
+      unit_id: "none",
       amount: "",
       description: "",
       expense_date: new Date().toISOString().split("T")[0],
@@ -127,8 +127,8 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props)
     try {
       const data = {
         category_id: formData.category_id,
-        property_id: formData.property_id || undefined,
-        unit_id: formData.unit_id || undefined,
+        property_id: formData.property_id !== "none" ? formData.property_id : undefined,
+        unit_id: formData.unit_id !== "none" ? formData.unit_id : undefined,
         amount: parseFloat(formData.amount),
         description: formData.description,
         expense_date: formData.expense_date,
@@ -267,7 +267,7 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props)
                   <SelectValue placeholder="اختر العقار" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون عقار</SelectItem>
+                  <SelectItem value="none">بدون عقار</SelectItem>
                   {properties.map((prop) => (
                     <SelectItem key={prop.id} value={prop.id}>
                       {prop.name_ar}
@@ -283,13 +283,13 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props)
               <Select
                 value={formData.unit_id}
                 onValueChange={(v) => setFormData({ ...formData, unit_id: v })}
-                disabled={!formData.property_id || units.length === 0}
+                disabled={!formData.property_id || formData.property_id === "none" || units.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="اختر الوحدة" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون وحدة</SelectItem>
+                  <SelectItem value="none">بدون وحدة</SelectItem>
                   {units.map((unit) => (
                     <SelectItem key={unit.id} value={unit.id}>
                       {unit.name} - {unit.unit_number}

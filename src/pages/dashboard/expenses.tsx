@@ -45,8 +45,8 @@ export default function ExpensesPage() {
   const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [filters, setFilters] = useState({
-    property_id: "",
-    category_id: "",
+    property_id: "all",
+    category_id: "all",
     start_date: "",
     end_date: "",
   });
@@ -58,8 +58,14 @@ export default function ExpensesPage() {
   async function loadData() {
     try {
       setLoading(true);
+      const apiFilters = {
+        property_id: filters.property_id !== "all" ? filters.property_id : undefined,
+        category_id: filters.category_id !== "all" ? filters.category_id : undefined,
+        start_date: filters.start_date || undefined,
+        end_date: filters.end_date || undefined,
+      };
       const [expensesData, categoriesData, propertiesData, statsData] = await Promise.all([
-        getExpenses(filters),
+        getExpenses(apiFilters),
         getExpenseCategories(),
         getProperties(),
         getExpenseStats(filters.start_date, filters.end_date),
@@ -194,7 +200,7 @@ export default function ExpensesPage() {
                   <SelectValue placeholder="جميع العقارات" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع العقارات</SelectItem>
+                  <SelectItem value="all">جميع العقارات</SelectItem>
                   {properties.map((prop) => (
                     <SelectItem key={prop.id} value={prop.id}>
                       {prop.name_ar}
@@ -208,7 +214,7 @@ export default function ExpensesPage() {
                   <SelectValue placeholder="جميع الفئات" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع الفئات</SelectItem>
+                  <SelectItem value="all">جميع الفئات</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name_ar}
