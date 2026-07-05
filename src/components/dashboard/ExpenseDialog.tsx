@@ -1,45 +1,48 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { expensesService, type ExpenseWithCategory } from "@/services/expenses.service";
-import { PropertiesService } from "@/services/properties.service";
-import { UnitsService } from "@/services/units.service";
-import type { Database } from "@/integrations/supabase/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
+import {
+  getExpenseCategories,
+  createExpense,
+  updateExpense,
+  type ExpenseCategory,
+  type Expense,
+} from "@/services/expenses.service";
+import { getProperties, type Property } from "@/services/properties.service";
+import { getUnits, type Unit } from "@/services/units.service";
 
-type ExpenseCategory = Database["public"]["Tables"]["expense_categories"]["Row"];
-type Property = Database["public"]["Tables"]["properties"]["Row"];
-type Unit = Database["public"]["Tables"]["units"]["Row"];
-
-interface ExpenseDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  expense: ExpenseWithCategory | null;
-  onSuccess: () => void;
+  expense?: Expense | null;
+  onSuccess?: () => void;
 }
 
-export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: ExpenseDialogProps) {
-  const { toast } = useToast();
+export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
     category_id: "",
     property_id: "",
     unit_id: "",
     amount: "",
+    description: "",
     expense_date: new Date().toISOString().split("T")[0],
-    status: "pending" as "pending" | "approved" | "paid" | "rejected",
-    payment_method: "",
     vendor: "",
-    receipt_url: "",
+    payment_method: "cash",
     notes: "",
   });
 
@@ -48,17 +51,14 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
       loadData();
       if (expense) {
         setFormData({
-          title: expense.title,
-          description: expense.description || "",
           category_id: expense.category_id,
           property_id: expense.property_id || "",
           unit_id: expense.unit_id || "",
           amount: expense.amount.toString(),
+          description: expense.description,
           expense_date: expense.expense_date,
-          status: expense.status as "pending" | "approved" | "paid" | "rejected",
-          payment_method: expense.payment_method || "",
-          vendor: "",
-          receipt_url: expense.receipt_url || "",
+          vendor: expense.vendor || "",
+          payment_method: expense.payment_method || "cash",
           notes: expense.notes || "",
         });
       } else {
@@ -76,11 +76,11 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
     }
   }, [formData.property_id]);
 
-  const loadData = async () => {
+  async function loadData() {
     try {
       const [categoriesData, propertiesData] = await Promise.all([
-        expensesService.getCategories(),
-        PropertiesService.getAll(),
+        getExpenseCategories(),
+        getProperties(),
       ]);
       setCategories(categoriesData);
       setProperties(propertiesData);
@@ -91,55 +91,63 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
         variant: "destructive",
       });
     }
-  };
+  }
 
-  const loadUnits = async (propertyId: string) => {
+  async function loadUnits(propertyId: string) {
     try {
-      const unitsData = await UnitsService.getByProperty(propertyId);
+      const unitsData = await getUnits({ property_id: propertyId });
       setUnits(unitsData);
     } catch (error: any) {
-      console.error("Error loading units:", error);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.title || !formData.category_id || !formData.amount) {
       toast({
         title: "خطأ",
-        description: "الرجاء ملء الحقول المطلوبة",
+        description: error.message,
         variant: "destructive",
       });
-      return;
     }
+  }
 
+  function resetForm() {
+    setFormData({
+      category_id: "",
+      property_id: "",
+      unit_id: "",
+      amount: "",
+      description: "",
+      expense_date: new Date().toISOString().split("T")[0],
+      vendor: "",
+      payment_method: "cash",
+      notes: "",
+    });
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
+
     try {
       const data = {
-        title: formData.title,
-        description: formData.description || null,
         category_id: formData.category_id,
-        property_id: formData.property_id || null,
-        unit_id: formData.unit_id || null,
+        property_id: formData.property_id || undefined,
+        unit_id: formData.unit_id || undefined,
         amount: parseFloat(formData.amount),
+        description: formData.description,
         expense_date: formData.expense_date,
-        status: formData.status,
-        payment_method: formData.payment_method || null,
-        receipt_url: formData.receipt_url || null,
-        notes: formData.notes || null,
+        vendor: formData.vendor || undefined,
+        payment_method: formData.payment_method || undefined,
+        notes: formData.notes || undefined,
       };
 
       if (expense) {
-        await expensesService.updateExpense(expense.id, data);
+        await updateExpense(expense.id, data);
         toast({ title: "تم تحديث المصروف بنجاح" });
       } else {
-        await expensesService.createExpense(data);
+        await createExpense(data);
         toast({ title: "تم إضافة المصروف بنجاح" });
       }
 
-      onSuccess();
+      onSuccess?.();
       onOpenChange(false);
+      resetForm();
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -149,52 +157,27 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      category_id: "",
-      property_id: "",
-      unit_id: "",
-      amount: "",
-      expense_date: new Date().toISOString().split("T")[0],
-      status: "pending",
-      payment_method: "",
-      vendor: "",
-      receipt_url: "",
-      notes: "",
-    });
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
-            {expense ? "تعديل المصروف" : "إضافة مصروف جديد"}
-          </DialogTitle>
-          <DialogDescription>
-            سجّل مصروف جديد وربطه بعقار أو وحدة
-          </DialogDescription>
+          <DialogTitle>{expense ? "تعديل مصروف" : "إضافة مصروف جديد"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label>عنوان المصروف *</Label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="مثال: صيانة مكيف الهواء"
+          <div className="grid grid-cols-2 gap-4">
+            {/* Category */}
+            <div className="space-y-2">
+              <Label>
+                فئة المصروف <span className="text-destructive">*</span>
+              </Label>
+              <Select
+                value={formData.category_id}
+                onValueChange={(v) => setFormData({ ...formData, category_id: v })}
                 required
-              />
-            </div>
-
-            <div>
-              <Label>الفئة *</Label>
-              <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="اختر الفئة" />
                 </SelectTrigger>
@@ -207,24 +190,81 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Amount */}
+            <div className="space-y-2">
+              <Label>
+                المبلغ (ريال) <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                required
+                placeholder="0.00"
+              />
+            </div>
           </div>
 
-          <div>
-            <Label>الوصف</Label>
-            <Textarea
+          {/* Description */}
+          <div className="space-y-2">
+            <Label>
+              تفاصيل المصروف <span className="text-destructive">*</span>
+            </Label>
+            <Input
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="تفاصيل إضافية عن المصروف..."
-              rows={2}
+              required
+              placeholder="مثال: صيانة مكيف الوحدة 201"
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label>العقار</Label>
-              <Select value={formData.property_id} onValueChange={(value) => setFormData({ ...formData, property_id: value })}>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Date */}
+            <div className="space-y-2">
+              <Label>
+                التاريخ <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                type="date"
+                value={formData.expense_date}
+                onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })}
+                required
+              />
+            </div>
+
+            {/* Payment Method */}
+            <div className="space-y-2">
+              <Label>طريقة الدفع</Label>
+              <Select
+                value={formData.payment_method}
+                onValueChange={(v) => setFormData({ ...formData, payment_method: v })}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر العقار (اختياري)" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">نقدي</SelectItem>
+                  <SelectItem value="bank_transfer">تحويل بنكي</SelectItem>
+                  <SelectItem value="credit_card">بطاقة ائتمان</SelectItem>
+                  <SelectItem value="check">شيك</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Property */}
+            <div className="space-y-2">
+              <Label>العقار (اختياري)</Label>
+              <Select
+                value={formData.property_id}
+                onValueChange={(v) => setFormData({ ...formData, property_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر العقار" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">بدون عقار</SelectItem>
@@ -237,21 +277,22 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
               </Select>
             </div>
 
-            <div>
-              <Label>الوحدة</Label>
-              <Select 
-                value={formData.unit_id} 
-                onValueChange={(value) => setFormData({ ...formData, unit_id: value })}
-                disabled={!formData.property_id}
+            {/* Unit */}
+            <div className="space-y-2">
+              <Label>الوحدة (اختياري)</Label>
+              <Select
+                value={formData.unit_id}
+                onValueChange={(v) => setFormData({ ...formData, unit_id: v })}
+                disabled={!formData.property_id || units.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={formData.property_id ? "اختر الوحدة (اختياري)" : "اختر العقار أولاً"} />
+                  <SelectValue placeholder="اختر الوحدة" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">بدون وحدة</SelectItem>
                   {units.map((unit) => (
                     <SelectItem key={unit.id} value={unit.id}>
-                      {unit.unit_number}
+                      {unit.name} - {unit.unit_number}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -259,88 +300,30 @@ export function ExpenseDialog({ open, onOpenChange, expense, onSuccess }: Expens
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <Label>المبلغ (ر.س) *</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                placeholder="0.00"
-                required
-              />
-            </div>
-
-            <div>
-              <Label>التاريخ *</Label>
-              <Input
-                type="date"
-                value={formData.expense_date}
-                onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>الحالة</Label>
-              <Select value={formData.status} onValueChange={(value: any) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">قيد الانتظار</SelectItem>
-                  <SelectItem value="approved">معتمد</SelectItem>
-                  <SelectItem value="paid">مدفوع</SelectItem>
-                  <SelectItem value="rejected">مرفوض</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label>طريقة الدفع</Label>
-              <Input
-                value={formData.payment_method}
-                onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-                placeholder="مثال: نقدي، بنكي، بطاقة"
-              />
-            </div>
-
-            <div>
-              <Label>المورد / الجهة</Label>
-              <Input
-                value={formData.vendor}
-                onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
-                placeholder="اسم المورد أو الشركة"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>رابط الفاتورة / الإيصال</Label>
+          {/* Vendor */}
+          <div className="space-y-2">
+            <Label>المورّد / الجهة (اختياري)</Label>
             <Input
-              type="url"
-              value={formData.receipt_url}
-              onChange={(e) => setFormData({ ...formData, receipt_url: e.target.value })}
-              placeholder="https://..."
+              value={formData.vendor}
+              onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
+              placeholder="مثال: شركة الصيانة السريعة"
             />
           </div>
 
-          <div>
-            <Label>ملاحظات</Label>
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label>ملاحظات (اختياري)</Label>
             <Textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="أي ملاحظات إضافية..."
-              rows={2}
+              rows={3}
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 pt-4">
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? "جاري الحفظ..." : expense ? "تحديث المصروف" : "إضافة المصروف"}
+              {expense ? "تحديث المصروف" : "إضافة المصروف"}
             </Button>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               إلغاء

@@ -1,87 +1,144 @@
--- إنشاء جدول أنواع المصروفات (expense_categories)
-CREATE TABLE expense_categories (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  name_ar TEXT NOT NULL,
-  description TEXT,
-  icon TEXT,
-  color TEXT DEFAULT '#64748b',
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  CONSTRAINT expense_categories_name_key UNIQUE (name)
+-- =============================================
+-- نظام إدارة المصروفات الكامل
+-- Expense Management System
+-- =============================================
+
+-- جدول فئات المصروفات
+CREATE TABLE IF NOT EXISTS public.expense_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name_ar TEXT NOT NULL,
+    name_en TEXT NOT NULL,
+    icon TEXT,
+    color TEXT,
+    is_system BOOLEAN DEFAULT FALSE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- إنشاء جدول المصروفات (expenses)
-CREATE TABLE expenses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  expense_number TEXT NOT NULL UNIQUE,
-  category_id UUID NOT NULL REFERENCES expense_categories(id) ON DELETE RESTRICT,
-  property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
-  unit_id UUID REFERENCES units(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  description TEXT,
-  amount NUMERIC(10,2) NOT NULL,
-  currency TEXT DEFAULT 'SAR',
-  payment_method TEXT CHECK (payment_method IN ('cash', 'bank_transfer', 'credit_card', 'debit_card', 'mada')),
-  paid_to TEXT,
-  receipt_url TEXT,
-  expense_date DATE NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'paid', 'rejected')),
-  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
-  approved_at TIMESTAMPTZ,
-  notes TEXT,
-  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
+-- جدول المصروفات
+CREATE TABLE IF NOT EXISTS public.expenses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    expense_number TEXT UNIQUE,
+    category_id UUID REFERENCES public.expense_categories(id) ON DELETE RESTRICT NOT NULL,
+    property_id UUID REFERENCES public.properties(id) ON DELETE CASCADE,
+    unit_id UUID REFERENCES public.units(id) ON DELETE CASCADE,
+    amount DECIMAL(10,2) NOT NULL CHECK (amount >= 0),
+    description TEXT NOT NULL,
+    expense_date DATE NOT NULL,
+    vendor TEXT,
+    payment_method TEXT,
+    notes TEXT,
+    attachment_url TEXT,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- إنشاء الفهارس
-CREATE INDEX idx_expenses_category ON expenses(category_id);
-CREATE INDEX idx_expenses_property ON expenses(property_id);
-CREATE INDEX idx_expenses_unit ON expenses(unit_id);
-CREATE INDEX idx_expenses_date ON expenses(expense_date);
-CREATE INDEX idx_expenses_status ON expenses(status);
-CREATE INDEX idx_expense_categories_active ON expense_categories(is_active);
+-- Indexes للأداء
+CREATE INDEX idx_expenses_user ON public.expenses(user_id);
+CREATE INDEX idx_expenses_category ON public.expenses(category_id);
+CREATE INDEX idx_expenses_property ON public.expenses(property_id);
+CREATE INDEX idx_expenses_date ON public.expenses(expense_date DESC);
+CREATE INDEX idx_expense_categories_user ON public.expense_categories(user_id);
 
--- تفعيل RLS
-ALTER TABLE expense_categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+-- RLS Policies
+ALTER TABLE public.expense_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 
--- سياسات RLS لأنواع المصروفات
-CREATE POLICY "public_read_expense_categories" ON expense_categories
-  FOR SELECT USING (true);
+-- فئات المصروفات: المستخدم يرى الفئات النظامية + فئاته الخاصة
+CREATE POLICY "select_expense_categories" ON public.expense_categories
+    FOR SELECT USING (is_system = TRUE OR user_id = auth.uid());
 
-CREATE POLICY "public_insert_expense_categories" ON expense_categories
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "insert_expense_categories" ON public.expense_categories
+    FOR INSERT WITH CHECK (user_id = auth.uid() AND is_system = FALSE);
 
-CREATE POLICY "public_update_expense_categories" ON expense_categories
-  FOR UPDATE USING (true);
+CREATE POLICY "update_expense_categories" ON public.expense_categories
+    FOR UPDATE USING (user_id = auth.uid() AND is_system = FALSE);
 
-CREATE POLICY "public_delete_expense_categories" ON expense_categories
-  FOR DELETE USING (true);
+CREATE POLICY "delete_expense_categories" ON public.expense_categories
+    FOR DELETE USING (user_id = auth.uid() AND is_system = FALSE);
 
--- سياسات RLS للمصروفات
-CREATE POLICY "public_read_expenses" ON expenses
-  FOR SELECT USING (true);
+-- المصروفات: المستخدم يدير مصروفاته فقط
+CREATE POLICY "select_expenses" ON public.expenses
+    FOR SELECT USING (user_id = auth.uid());
 
-CREATE POLICY "public_insert_expenses" ON expenses
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "insert_expenses" ON public.expenses
+    FOR INSERT WITH CHECK (user_id = auth.uid());
 
-CREATE POLICY "public_update_expenses" ON expenses
-  FOR UPDATE USING (true);
+CREATE POLICY "update_expenses" ON public.expenses
+    FOR UPDATE USING (user_id = auth.uid());
 
-CREATE POLICY "public_delete_expenses" ON expenses
-  FOR DELETE USING (true);
+CREATE POLICY "delete_expenses" ON public.expenses
+    FOR DELETE USING (user_id = auth.uid());
 
--- إدراج أنواع مصروفات افتراضية
-INSERT INTO expense_categories (name, name_ar, description, icon, color) VALUES
-  ('utilities', 'المرافق', 'فواتير الكهرباء والماء والغاز', 'Zap', '#f59e0b'),
-  ('maintenance', 'الصيانة', 'تكاليف الصيانة والإصلاحات', 'Wrench', '#ef4444'),
-  ('cleaning', 'التنظيف', 'مواد ومستلزمات التنظيف', 'Sparkles', '#06b6d4'),
-  ('salaries', 'الرواتب', 'رواتب الموظفين والعمالة', 'Users', '#8b5cf6'),
-  ('insurance', 'التأمين', 'تأمين العقار والمحتويات', 'Shield', '#10b981'),
-  ('taxes', 'الضرائب', 'الضرائب والرسوم الحكومية', 'FileText', '#f43f5e'),
-  ('marketing', 'التسويق', 'تكاليف التسويق والإعلان', 'TrendingUp', '#ec4899'),
-  ('commission', 'العمولات', 'عمولات المنصات والوسطاء', 'Percent', '#6366f1'),
-  ('other', 'أخرى', 'مصروفات أخرى متنوعة', 'MoreHorizontal', '#64748b');
+-- إدراج الفئات الافتراضية (نظامية)
+INSERT INTO public.expense_categories (name_ar, name_en, icon, color, is_system) VALUES
+    ('المرتبات', 'Salaries', 'Users', 'blue', TRUE),
+    ('الصيانة', 'Maintenance', 'Wrench', 'orange', TRUE),
+    ('النظافة', 'Cleaning', 'Sparkles', 'green', TRUE),
+    ('الإيجار', 'Rent', 'Home', 'purple', TRUE),
+    ('رسوم', 'Fees', 'Receipt', 'red', TRUE),
+    ('المرافق', 'Utilities', 'Zap', 'yellow', TRUE),
+    ('التأمين', 'Insurance', 'Shield', 'indigo', TRUE),
+    ('التسويق', 'Marketing', 'TrendingUp', 'pink', TRUE),
+    ('القانونية', 'Legal', 'Scale', 'gray', TRUE),
+    ('أخرى', 'Other', 'MoreHorizontal', 'slate', TRUE);
+
+-- Function لتوليد رقم المصروف التلقائي
+CREATE OR REPLACE FUNCTION generate_expense_number()
+RETURNS TEXT AS $$
+DECLARE
+    next_number INTEGER;
+    expense_number TEXT;
+BEGIN
+    -- الحصول على آخر رقم
+    SELECT COALESCE(MAX(CAST(SUBSTRING(expense_number FROM 5) AS INTEGER)), 0) + 1
+    INTO next_number
+    FROM public.expenses
+    WHERE expense_number LIKE 'EXP-%';
+    
+    -- تنسيق الرقم
+    expense_number := 'EXP-' || LPAD(next_number::TEXT, 6, '0');
+    
+    RETURN expense_number;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger لتوليد رقم المصروف تلقائياً
+CREATE OR REPLACE FUNCTION set_expense_number()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.expense_number IS NULL THEN
+        NEW.expense_number := generate_expense_number();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_expense_insert
+BEFORE INSERT ON public.expenses
+FOR EACH ROW
+EXECUTE FUNCTION set_expense_number();
+
+-- Trigger لتحديث updated_at
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_expenses_updated_at
+BEFORE UPDATE ON public.expenses
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER update_expense_categories_updated_at
+BEFORE UPDATE ON public.expense_categories
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+COMMENT ON TABLE public.expense_categories IS 'فئات المصروفات';
+COMMENT ON TABLE public.expenses IS 'المصروفات';

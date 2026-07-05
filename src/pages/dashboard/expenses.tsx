@@ -1,64 +1,73 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { expensesService, type ExpenseWithCategory } from "@/services/expenses.service";
-import { Plus, Search, Filter, Download, Settings, Trash2, Eye, Edit } from "lucide-react";
-import { ExpenseDialog } from "@/components/dashboard/ExpenseDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { ExpenseCategoriesDialog } from "@/components/dashboard/ExpenseCategoriesDialog";
-import type { Database } from "@/integrations/supabase/types";
-
-type ExpenseCategory = Database["public"]["Tables"]["expense_categories"]["Row"];
-
-const statusColors = {
-  pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
-  approved: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  paid: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  rejected: "bg-red-500/10 text-red-600 border-red-500/20",
-};
-
-const statusLabels = {
-  pending: "قيد الانتظار",
-  approved: "معتمد",
-  paid: "مدفوع",
-  rejected: "مرفوض",
-};
+import { ExpenseDialog } from "@/components/dashboard/ExpenseDialog";
+import { toast } from "@/hooks/use-toast";
+import {
+  getExpenses,
+  getExpenseCategories,
+  deleteExpense,
+  getExpenseStats,
+  type Expense,
+  type ExpenseCategory,
+  type ExpenseStats,
+} from "@/services/expenses.service";
+import { getProperties, type Property } from "@/services/properties.service";
+import {
+  Plus,
+  Settings,
+  Pencil,
+  Trash2,
+  DollarSign,
+  TrendingDown,
+  TrendingUp,
+  Filter,
+} from "lucide-react";
 
 export default function ExpensesPage() {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [expenses, setExpenses] = useState<ExpenseWithCategory[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [stats, setStats] = useState<ExpenseStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [categoriesDialogOpen, setCategoriesDialogOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<ExpenseWithCategory | null>(null);
+  const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [filters, setFilters] = useState({
+    property_id: "",
+    category_id: "",
+    start_date: "",
+    end_date: "",
+  });
 
   useEffect(() => {
     loadData();
-  }, [statusFilter, categoryFilter]);
+  }, [filters]);
 
-  const loadData = async () => {
+  async function loadData() {
     try {
       setLoading(true);
-      const [expensesData, categoriesData] = await Promise.all([
-        expensesService.getExpenses({
-          status: statusFilter !== "all" ? statusFilter : undefined,
-          categoryId: categoryFilter !== "all" ? categoryFilter : undefined,
-        }),
-        expensesService.getCategories(),
+      const [expensesData, categoriesData, propertiesData, statsData] = await Promise.all([
+        getExpenses(filters),
+        getExpenseCategories(),
+        getProperties(),
+        getExpenseStats(filters.start_date, filters.end_date),
       ]);
       setExpenses(expensesData);
       setCategories(categoriesData);
+      setProperties(propertiesData);
+      setStats(statsData);
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -68,13 +77,13 @@ export default function ExpensesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleDelete = async (id: string) => {
+  async function handleDelete(id: string) {
     if (!confirm("هل أنت متأكد من حذف هذا المصروف؟")) return;
-    
+
     try {
-      await expensesService.deleteExpense(id);
+      await deleteExpense(id);
       toast({ title: "تم حذف المصروف بنجاح" });
       loadData();
     } catch (error: any) {
@@ -84,15 +93,33 @@ export default function ExpensesPage() {
         variant: "destructive",
       });
     }
+  }
+
+  function handleEdit(expense: Expense) {
+    setSelectedExpense(expense);
+    setExpenseDialogOpen(true);
+  }
+
+  function handleAddNew() {
+    setSelectedExpense(null);
+    setExpenseDialogOpen(true);
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("ar-SA", {
+      style: "currency",
+      currency: "SAR",
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
-  const filteredExpenses = expenses.filter((exp) =>
-    exp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exp.expense_categories.name_ar.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-  const paidExpenses = filteredExpenses.filter(exp => exp.status === "paid").reduce((sum, exp) => sum + Number(exp.amount), 0);
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("ar-SA", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <AppShell>
@@ -100,68 +127,88 @@ export default function ExpensesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[hsl(222,47%,11%)]">المصروفات</h1>
-            <p className="text-[hsl(222,20%,40%)] mt-1">إدارة مصروفات العقارات والوحدات</p>
+            <h1 className="text-3xl font-display font-bold">المصروفات</h1>
+            <p className="text-muted-foreground mt-1">إدارة مصروفات المحفظة والعقارات</p>
           </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setCategoriesDialogOpen(true)}
-            >
-              <Settings className="w-4 h-4 ml-2" />
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setCategoriesDialogOpen(true)}>
+              <Settings className="h-4 w-4 ml-2" />
               إدارة الفئات
             </Button>
-            <Button onClick={() => {
-              setSelectedExpense(null);
-              setExpenseDialogOpen(true);
-            }}>
-              <Plus className="w-4 h-4 ml-2" />
+            <Button onClick={handleAddNew}>
+              <Plus className="h-4 w-4 ml-2" />
               إضافة مصروف
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardDescription>إجمالي المصروفات</CardDescription>
-              <CardTitle className="text-2xl">{totalExpenses.toLocaleString()} ر.س</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>المصروفات المدفوعة</CardDescription>
-              <CardTitle className="text-2xl text-emerald-600">{paidExpenses.toLocaleString()} ر.س</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>عدد المصروفات</CardDescription>
-              <CardTitle className="text-2xl">{filteredExpenses.length}</CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+        {stats && (
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">إجمالي المصروفات</CardTitle>
+                <TrendingDown className="h-4 w-4 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold tabular-nums">{formatCurrency(stats.total_expenses)}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+                <TrendingUp className="h-4 w-4 text-available" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold tabular-nums">{formatCurrency(stats.total_revenue)}</div>
+              </CardContent>
+            </Card>
+
+            <Card className={stats.net_profit >= 0 ? "border-available" : "border-destructive"}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">صافي الربح</CardTitle>
+                <DollarSign className={`h-4 w-4 ${stats.net_profit >= 0 ? "text-available" : "text-destructive"}`} />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold tabular-nums ${stats.net_profit >= 0 ? "text-available" : "text-destructive"}`}>
+                  {formatCurrency(stats.net_profit)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Filters */}
         <Card>
           <CardHeader>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(222,20%,40%)]" />
-                <Input
-                  placeholder="ابحث عن مصروف..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-10"
-                />
-              </div>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="كل الفئات" />
+            <CardTitle className="text-base flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              تصفية النتائج
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-4">
+              <Select value={filters.property_id} onValueChange={(v) => setFilters({ ...filters, property_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="جميع العقارات" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">كل الفئات</SelectItem>
+                  <SelectItem value="">جميع العقارات</SelectItem>
+                  {properties.map((prop) => (
+                    <SelectItem key={prop.id} value={prop.id}>
+                      {prop.name_ar}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={filters.category_id} onValueChange={(v) => setFilters({ ...filters, category_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="جميع الفئات" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">جميع الفئات</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name_ar}
@@ -169,111 +216,99 @@ export default function ExpensesPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="كل الحالات" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل الحالات</SelectItem>
-                  <SelectItem value="pending">قيد الانتظار</SelectItem>
-                  <SelectItem value="approved">معتمد</SelectItem>
-                  <SelectItem value="paid">مدفوع</SelectItem>
-                  <SelectItem value="rejected">مرفوض</SelectItem>
-                </SelectContent>
-              </Select>
+
+              <Input
+                type="date"
+                value={filters.start_date}
+                onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
+                placeholder="من تاريخ"
+              />
+
+              <Input
+                type="date"
+                value={filters.end_date}
+                onChange={(e) => setFilters({ ...filters, end_date: e.target.value })}
+                placeholder="إلى تاريخ"
+              />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Expenses List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>قائمة المصروفات ({expenses.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>رقم المصروف</TableHead>
-                  <TableHead>العنوان</TableHead>
-                  <TableHead>الفئة</TableHead>
-                  <TableHead>العقار</TableHead>
-                  <TableHead>التاريخ</TableHead>
-                  <TableHead>المبلغ</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
-                      جاري التحميل...
-                    </TableCell>
-                  </TableRow>
-                ) : filteredExpenses.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-[hsl(222,20%,40%)]">
-                      لا توجد مصروفات
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredExpenses.map((expense) => (
-                    <TableRow key={expense.id}>
-                      <TableCell className="font-mono text-sm">{expense.expense_number}</TableCell>
-                      <TableCell className="font-medium">{expense.title}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" style={{ 
-                          backgroundColor: `${expense.expense_categories.color}15`,
-                          borderColor: `${expense.expense_categories.color}40`,
-                          color: expense.expense_categories.color
-                        }}>
-                          {expense.expense_categories.name_ar}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {expense.properties ? expense.properties.name_ar : "-"}
-                      </TableCell>
-                      <TableCell>{new Date(expense.expense_date).toLocaleDateString("ar-SA")}</TableCell>
-                      <TableCell className="font-semibold">{Number(expense.amount).toLocaleString()} ر.س</TableCell>
-                      <TableCell>
-                        <Badge className={statusColors[expense.status as keyof typeof statusColors]}>
-                          {statusLabels[expense.status as keyof typeof statusLabels]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedExpense(expense);
-                              setExpenseDialogOpen(true);
-                            }}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(expense.id)}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">جارٍ التحميل...</div>
+            ) : expenses.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>لا توجد مصروفات مسجلة</p>
+                <Button variant="link" onClick={handleAddNew}>
+                  إضافة أول مصروف
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {expenses.map((expense) => (
+                  <div
+                    key={expense.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="font-mono text-sm text-muted-foreground">{expense.expense_number}</span>
+                        <Badge variant="secondary">{expense.category?.name_ar}</Badge>
+                        {expense.property && (
+                          <Badge variant="outline">{expense.property.name_ar}</Badge>
+                        )}
+                      </div>
+                      <div className="font-medium">{expense.description}</div>
+                      <div className="flex gap-4 text-sm text-muted-foreground mt-1">
+                        <span>{formatDate(expense.expense_date)}</span>
+                        {expense.vendor && <span>• {expense.vendor}</span>}
+                        {expense.payment_method && (
+                          <span>
+                            •{" "}
+                            {{
+                              cash: "نقدي",
+                              bank_transfer: "تحويل بنكي",
+                              credit_card: "بطاقة",
+                              check: "شيك",
+                            }[expense.payment_method]}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="text-left">
+                        <div className="text-2xl font-bold tabular-nums">{formatCurrency(expense.amount)}</div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(expense)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDelete(expense.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
+      {/* Dialogs */}
+      <ExpenseCategoriesDialog open={categoriesDialogOpen} onOpenChange={setCategoriesDialogOpen} />
       <ExpenseDialog
         open={expenseDialogOpen}
         onOpenChange={setExpenseDialogOpen}
         expense={selectedExpense}
-        onSuccess={loadData}
-      />
-
-      <ExpenseCategoriesDialog
-        open={categoriesDialogOpen}
-        onOpenChange={setCategoriesDialogOpen}
         onSuccess={loadData}
       />
     </AppShell>
