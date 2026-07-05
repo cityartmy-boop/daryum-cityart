@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
+import { getExpenseStats } from "@/services/expenses.service";
 import {
   Select,
   SelectContent,
@@ -18,19 +20,78 @@ import {
   Download,
   Search,
   Calendar,
-  CreditCard,
   Receipt
 } from "lucide-react";
 
 export default function FinancePage() {
   const [filter, setFilter] = useState("all");
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { label: "إجمالي الإيرادات", value: "﷼ 2,480,000", change: "+12.5%", trend: "up", color: "from-primary to-secondary" },
-    { label: "إجمالي المصروفات", value: "﷼ 156,000", change: "+5.2%", trend: "up", color: "from-red-500 to-orange-500" },
-    { label: "العمولات المدفوعة", value: "﷼ 372,000", change: "-2.1%", trend: "down", color: "from-amber-500 to-orange-500" },
-    { label: "المستحقات للملاك", value: "﷼ 1,864,000", change: "+15.3%", trend: "up", color: "from-blue-500 to-cyan-500" },
-    { label: "صافي الربح", value: "﷼ 88,000", change: "+3.2%", trend: "up", color: "from-emerald-500 to-green-500" },
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  async function loadStats() {
+    try {
+      setLoading(true);
+      const data = await getExpenseStats();
+      setStats(data);
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("ar-SA", {
+      style: "currency",
+      currency: "SAR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const kpiCards = [
+    { 
+      label: "إجمالي الإيرادات", 
+      value: stats ? formatCurrency(stats.total_revenue) : "...", 
+      change: "+12.5%", 
+      trend: "up", 
+      color: "from-primary to-secondary" 
+    },
+    { 
+      label: "إجمالي المصروفات", 
+      value: stats ? formatCurrency(stats.total_expenses) : "...", 
+      change: "+5.2%", 
+      trend: "up", 
+      color: "from-red-500 to-orange-500" 
+    },
+    { 
+      label: "العمولات المدفوعة", 
+      value: "﷼ 372,000", 
+      change: "-2.1%", 
+      trend: "down", 
+      color: "from-amber-500 to-orange-500" 
+    },
+    { 
+      label: "المستحقات للملاك", 
+      value: "﷼ 1,864,000", 
+      change: "+15.3%", 
+      trend: "up", 
+      color: "from-blue-500 to-cyan-500" 
+    },
+    { 
+      label: "صافي الربح", 
+      value: stats ? formatCurrency(stats.net_profit) : "...", 
+      change: stats && stats.net_profit > 0 ? "+3.2%" : "-3.2%", 
+      trend: stats && stats.net_profit > 0 ? "up" : "down", 
+      color: "from-emerald-500 to-green-500" 
+    },
   ];
 
   const transactions = [
@@ -114,7 +175,7 @@ export default function FinancePage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-black text-foreground">المالية</h1>
-              <p className="text-muted-foreground">إدارة الإيرادات والمصروفات</p>
+              <p className="text-muted-foreground">إدارة الإيرادات والمصروفات والأرباح</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline">
@@ -130,12 +191,14 @@ export default function FinancePage() {
 
           {/* KPIs */}
           <div className="grid md:grid-cols-5 gap-4">
-            {stats.map((stat, index) => (
+            {kpiCards.map((stat, index) => (
               <div key={index} className="glass rounded-xl p-6">
                 <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} p-3 mb-3`}>
                   <DollarSign className="w-full h-full text-white" />
                 </div>
-                <div className="text-2xl font-bold text-foreground tabular-nums mb-1">{stat.value}</div>
+                <div className="text-2xl font-bold text-foreground tabular-nums mb-1">
+                  {loading ? "..." : stat.value}
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{stat.label}</span>
                   <span className={`text-sm font-semibold flex items-center gap-1 ${stat.trend === 'up' ? 'text-available' : 'text-destructive'}`}>

@@ -8,6 +8,7 @@ import { ChannelPerformance } from "@/components/dashboard/ChannelPerformance";
 import { RecentReservations } from "@/components/dashboard/RecentReservations";
 import { TodaysOperations } from "@/components/dashboard/TodaysOperations";
 import { AIInsights } from "@/components/dashboard/AIInsights";
+import { ExpensesSummary } from "@/components/dashboard/ExpensesSummary";
 
 export default function DashboardPage() {
   return (
@@ -32,6 +33,9 @@ export default function DashboardPage() {
 
           {/* Channel Performance */}
           <ChannelPerformance />
+
+          {/* Expenses Summary - NEW */}
+          <ExpensesSummary />
 
           {/* AI Insights */}
           <AIInsights />
