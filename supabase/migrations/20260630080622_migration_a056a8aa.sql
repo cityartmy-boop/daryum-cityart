@@ -85,6 +85,179 @@ INSERT INTO public.expense_categories (name_ar, name_en, icon, color, is_system)
     ('القانونية', 'Legal', 'Scale', 'gray', TRUE),
     ('أخرى', 'Other', 'MoreHorizontal', 'slate', TRUE);
 
+-- =============================================
+-- بيانات نموذجية للمصروفات (Sample Data)
+-- =============================================
+-- ملاحظة: هذه البيانات النموذجية تحتاج إلى user_id و property_id صحيح
+-- يمكنك تشغيل هذه الأوامر بعد إنشاء المستخدم والعقارات
+-- استبدل 'YOUR_USER_ID' و 'YOUR_PROPERTY_ID' بالقيم الفعلية
+
+-- للحصول على user_id الخاص بك:
+-- SELECT id FROM auth.users WHERE email = 'your-email@example.com';
+
+-- للحصول على property_id:
+-- SELECT id FROM public.properties WHERE user_id = 'YOUR_USER_ID' LIMIT 1;
+
+-- مثال 1: مصروف مرتبات
+-- INSERT INTO public.expenses (
+--     category_id,
+--     property_id,
+--     amount,
+--     description,
+--     expense_date,
+--     vendor,
+--     payment_method,
+--     notes,
+--     user_id
+-- ) VALUES (
+--     (SELECT id FROM public.expense_categories WHERE name_ar = 'المرتبات' AND is_system = TRUE LIMIT 1),
+--     'YOUR_PROPERTY_ID',
+--     15000.00,
+--     'راتب شهر يناير 2026 - فريق الصيانة والنظافة',
+--     '2026-01-31',
+--     'فريق العمل',
+--     'bank_transfer',
+--     'تم الدفع في نهاية الشهر عبر التحويل البنكي',
+--     'YOUR_USER_ID'
+-- );
+
+-- مثال 2: مصروف صيانة
+-- INSERT INTO public.expenses (
+--     category_id,
+--     property_id,
+--     amount,
+--     description,
+--     expense_date,
+--     vendor,
+--     payment_method,
+--     notes,
+--     user_id
+-- ) VALUES (
+--     (SELECT id FROM public.expense_categories WHERE name_ar = 'الصيانة' AND is_system = TRUE LIMIT 1),
+--     'YOUR_PROPERTY_ID',
+--     3500.00,
+--     'إصلاح نظام التكييف - وحدة A3',
+--     '2026-02-05',
+--     'شركة التبريد المتقدمة',
+--     'cash',
+--     'صيانة طارئة - تم إصلاح ضاغط التكييف',
+--     'YOUR_USER_ID'
+-- );
+
+-- مثال 3: مصروف مرافق
+-- INSERT INTO public.expenses (
+--     category_id,
+--     property_id,
+--     amount,
+--     description,
+--     expense_date,
+--     vendor,
+--     payment_method,
+--     notes,
+--     user_id
+-- ) VALUES (
+--     (SELECT id FROM public.expense_categories WHERE name_ar = 'المرافق' AND is_system = TRUE LIMIT 1),
+--     'YOUR_PROPERTY_ID',
+--     4200.00,
+--     'فاتورة الكهرباء والماء - شهر فبراير 2026',
+--     '2026-02-28',
+--     'الشركة السعودية للكهرباء',
+--     'online',
+--     'دفع إلكتروني - فاتورة رقم EC-2026-0234',
+--     'YOUR_USER_ID'
+-- );
+
+-- =============================================
+-- Function لإدراج بيانات نموذجية للمستخدم الحالي
+-- =============================================
+CREATE OR REPLACE FUNCTION insert_sample_expenses(p_property_id UUID DEFAULT NULL)
+RETURNS TEXT AS $$
+DECLARE
+    v_user_id UUID;
+    v_property_id UUID;
+    v_count INTEGER;
+BEGIN
+    -- الحصول على user_id الحالي
+    v_user_id := auth.uid();
+    
+    IF v_user_id IS NULL THEN
+        RETURN 'خطأ: يجب تسجيل الدخول أولاً';
+    END IF;
+    
+    -- الحصول على property_id
+    IF p_property_id IS NOT NULL THEN
+        v_property_id := p_property_id;
+    ELSE
+        -- استخدام أول عقار للمستخدم
+        SELECT id INTO v_property_id
+        FROM public.properties
+        WHERE user_id = v_user_id
+        LIMIT 1;
+        
+        IF v_property_id IS NULL THEN
+            RETURN 'خطأ: لا توجد عقارات مسجلة. قم بإضافة عقار أولاً';
+        END IF;
+    END IF;
+    
+    -- إدراج المصروفات النموذجية
+    INSERT INTO public.expenses (
+        category_id,
+        property_id,
+        amount,
+        description,
+        expense_date,
+        vendor,
+        payment_method,
+        notes,
+        user_id
+    ) VALUES 
+    (
+        (SELECT id FROM public.expense_categories WHERE name_ar = 'المرتبات' AND is_system = TRUE LIMIT 1),
+        v_property_id,
+        15000.00,
+        'راتب شهر يناير 2026 - فريق الصيانة والنظافة',
+        CURRENT_DATE - INTERVAL '30 days',
+        'فريق العمل',
+        'bank_transfer',
+        'تم الدفع في نهاية الشهر عبر التحويل البنكي',
+        v_user_id
+    ),
+    (
+        (SELECT id FROM public.expense_categories WHERE name_ar = 'الصيانة' AND is_system = TRUE LIMIT 1),
+        v_property_id,
+        3500.00,
+        'إصلاح نظام التكييف - وحدة A3',
+        CURRENT_DATE - INTERVAL '15 days',
+        'شركة التبريد المتقدمة',
+        'cash',
+        'صيانة طارئة - تم إصلاح ضاغط التكييف',
+        v_user_id
+    ),
+    (
+        (SELECT id FROM public.expense_categories WHERE name_ar = 'المرافق' AND is_system = TRUE LIMIT 1),
+        v_property_id,
+        4200.00,
+        'فاتورة الكهرباء والماء - شهر فبراير 2026',
+        CURRENT_DATE - INTERVAL '5 days',
+        'الشركة السعودية للكهرباء',
+        'online',
+        'دفع إلكتروني - فاتورة رقم EC-2026-0234',
+        v_user_id
+    );
+    
+    GET DIAGNOSTICS v_count = ROW_COUNT;
+    
+    RETURN 'تم إدراج ' || v_count || ' مصروفات نموذجية بنجاح';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- تعليمات الاستخدام:
+-- 1. بعد تسجيل الدخول وإنشاء عقار، شغّل:
+--    SELECT insert_sample_expenses();
+--
+-- 2. أو حدد عقار معين:
+--    SELECT insert_sample_expenses('property-id-here');
+
 -- Function لتوليد رقم المصروف التلقائي
 CREATE OR REPLACE FUNCTION generate_expense_number()
 RETURNS TEXT AS $$
